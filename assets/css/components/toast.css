@@ -1,0 +1,49 @@
+/**
+ * components/toast.css — Toast / ToastStack
+ * ------------------------------------------------------------------
+ * Purpose:      Notification queue rendered by
+ *               assets/js/components/toast.js, driven by RaxNotifications.
+ * Responsibility: role="status" / aria-live presentation (Phase B §8).
+ * Public API:   .toast-stack, .toast, .toast-icon, .toast-body,
+ *               .toast-close
+ * Dependencies: theme.css, animations.css
+ */
+
+.toast-stack {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 340px;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-2);
+}
+
+.toast-icon { flex-shrink: 0; margin-top: 1px; }
+.toast-icon [data-lucide] { width: 16px; height: 16px; }
+.toast[data-type='ok'] .toast-icon { color: var(--status-ok); }
+.toast[data-type='warn'] .toast-icon { color: var(--status-warn); }
+.toast[data-type='danger'] .toast-icon { color: var(--status-danger); }
+.toast[data-type='info'] .toast-icon { color: var(--status-info); }
+
+.toast-body { flex: 1; font: 500 var(--text-sm) var(--font-ui); color: var(--text-primary); }
+
+.toast-close {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+  cursor: pointer;
+}
+.toast-close:hover { color: var(--text-primary); }
+.toast-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

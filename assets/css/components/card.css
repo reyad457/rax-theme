@@ -1,0 +1,207 @@
+/**
+ * components/card.css — CARD FAMILY
+ * ------------------------------------------------------------------
+ * Purpose:      Base .card surface + every component that extends it
+ *               per the Phase B hierarchy: StatCard, VlanCard,
+ *               FeedCard (+FeedItem/TimelineItem), PortStrip,
+ *               NetworkMap.
+ * Responsibility: Visual presentation of "a unit of data in a
+ *               rounded surface." Owns no data-fetching or state.
+ * Public API:   .card, .card-glow-cyan, .card-glow-green, .card-head,
+ *               .card-title, .card-title-row, .metric-value,
+ *               .metric-label, .card-scroll, .vlan-card, .vlan-head,
+ *               .vlan-name, .vlan-color-dot, .vlan-meta, .feed-item,
+ *               .feed-icon, .feed-text, .feed-meta, .timeline-item,
+ *               .timeline-dot, .port-chip, .netmap-node, .netmap-line
+ * Dependencies: theme.css (semantic tokens), animations.css (entrance)
+ * Extension:    New card *variants* (e.g. a future AlertCard) should
+ *               follow the same --card-padding component token below
+ *               rather than introducing new spacing values.
+ */
+
+:root {
+  /* Tier 3 — component-scoped tokens, built from Tier 2 only */
+  --card-padding: var(--space-6);
+  --card-radius: var(--radius-lg);
+  --card-gap: var(--space-4);
+}
+
+.card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  box-shadow: var(--shadow-1);
+}
+
+.card-glow-cyan { box-shadow: var(--shadow-1), 0 0 0 1px rgba(0, 217, 255, 0.12); }
+.card-glow-green { box-shadow: var(--shadow-1), 0 0 0 1px rgba(0, 255, 157, 0.12); }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.card-title {
+  font: 600 var(--text-sm) var(--font-ui);
+  color: var(--text-secondary);
+  letter-spacing: 0.01em;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-primary);
+}
+.card-title-row [data-lucide] { width: 16px; height: 16px; color: var(--accent); }
+
+.metric-value {
+  font: 700 var(--text-2xl) var(--font-ui);
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.metric-label {
+  margin-top: var(--space-1);
+  font: 500 var(--text-xs) var(--font-ui);
+  color: var(--text-tertiary);
+}
+
+/* Scrollable card body (feeds, tall tables inside a card) */
+.card-scroll {
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* ---- VlanCard (extends Card) ------------------------------------------- */
+.vlan-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+}
+.vlan-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+.vlan-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: 600 var(--text-md) var(--font-ui);
+  color: var(--text-primary);
+}
+.vlan-color-dot {
+  width: 9px; height: 9px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+.vlan-meta {
+  display: flex;
+  justify-content: space-between;
+  font: 500 var(--text-xs) var(--font-ui);
+  color: var(--text-tertiary);
+  padding: var(--space-1) 0;
+}
+.vlan-meta span:last-child {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+/* ---- FeedCard children: FeedItem / TimelineItem ------------------------ */
+.feed-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-hairline);
+}
+.feed-item:last-child { border-bottom: none; }
+
+.feed-icon {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.feed-icon [data-lucide] { width: 15px; height: 15px; }
+.feed-icon.ok { background: rgba(0, 255, 157, 0.12); color: var(--status-ok); }
+.feed-icon.warn { background: rgba(255, 200, 87, 0.12); color: var(--status-warn); }
+.feed-icon.danger { background: rgba(255, 59, 92, 0.12); color: var(--status-danger); }
+
+.feed-text { font: 500 var(--text-sm) var(--font-ui); color: var(--text-primary); line-height: 1.4; }
+.feed-meta { margin-top: 2px; font: 500 var(--text-xs) var(--font-ui); color: var(--text-tertiary); }
+
+.timeline-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  position: relative;
+}
+.timeline-dot {
+  width: 8px; height: 8px;
+  margin-top: 5px;
+  border-radius: var(--radius-full);
+  background: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+/* ---- PortStrip ----------------------------------------------------------- */
+.port-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.port-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-hairline);
+  background: var(--surface-overlay);
+  font: 600 var(--text-xs) var(--font-ui);
+  color: var(--text-secondary);
+}
+.port-chip .dot {
+  width: 7px; height: 7px;
+  border-radius: var(--radius-full);
+}
+.port-chip.up .dot { background: var(--status-ok); box-shadow: 0 0 6px var(--status-ok-glow); }
+.port-chip.down .dot { background: var(--text-tertiary); }
+.port-chip span:last-child { color: var(--text-tertiary); font-weight: 500; }
+
+/* ---- NetworkMap ------------------------------------------------------------ */
+.netmap-svg {
+  position: absolute;
+  inset: 0;
+}
+
+.netmap-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+.netmap-node .dot { width: 10px; height: 10px; border-radius: var(--radius-full); }
+.netmap-node .label {
+  font: 600 var(--text-2xs) var(--font-ui);
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+.netmap-line {
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+.netmap-line.flow {
+  stroke-dasharray: 4 4;
+}

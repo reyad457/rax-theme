@@ -1,0 +1,45 @@
+/**
+ * components/button.css — Button
+ * ------------------------------------------------------------------
+ * Purpose:      All clickable actions across the theme.
+ * Public API:   .btn, .btn-primary, .btn-ghost
+ * Dependencies: theme.css
+ * Extension:    Add a new variant class here (e.g. .btn-danger) —
+ *               never a one-off inline-styled button.
+ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font: 600 var(--text-xs) var(--font-ui);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard),
+              border-color var(--duration-fast) var(--ease-standard),
+              transform var(--duration-fast) var(--ease-standard);
+}
+.btn [data-lucide] { width: 14px; height: 14px; }
+.btn:active { transform: scale(0.97); }
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--text-inverse);
+}
+.btn-primary:hover { background: var(--accent-strong); }
+
+.btn-ghost {
+  background: var(--surface-overlay);
+  border-color: var(--border-hairline);
+  color: var(--text-secondary);
+}
+.btn-ghost:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}

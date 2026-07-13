@@ -1,0 +1,82 @@
+/**
+ * utilities.css — SPACING / TYPE / DISPLAY UTILITIES
+ * ------------------------------------------------------------------
+ * Purpose:      Small single-property helpers for layout glue. This
+ *               is the direct replacement for the 117 inline
+ *               style="..." attributes found in the Phase A audit
+ *               (margin-bottom:18px, height:210px, font-size:12px...).
+ * Responsibility: Layout/spacing/typography GLUE only. If the same
+ *               utility combination repeats 3+ times for one
+ *               semantic purpose, promote it to a real component
+ *               class instead of composing utilities further.
+ * Dependencies: variables.css (spacing/type scale)
+ * Extension:    Add narrowly-scoped utilities here. Do not add
+ *               component-shaped classes (that belongs in
+ *               components/*.css).
+ */
+
+/* Spacing (margin-bottom covers the single most common Phase A case) */
+.mb-0 { margin-bottom: 0; }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-6 { margin-bottom: var(--space-6); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.text-center { text-align: center; }
+.relative { position: relative; }
+
+/* Chart / canvas mount heights — replaces hardcoded height:190px/210px/220px/260px */
+.h-chart-sm { height: 190px; }
+.h-chart-md { height: 210px; }
+.h-chart-lg { height: 220px; }
+.h-chart-xl { height: 260px; }
+
+/* Typography */
+.text-2xs { font-size: var(--text-2xs); }
+.text-xs { font-size: var(--text-xs); }
+.text-sm { font-size: var(--text-sm); }
+.text-md { font-size: var(--text-md); }
+.font-semibold { font-weight: 600; }
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+.text-ok { color: var(--status-ok); }
+.text-warn { color: var(--status-warn); }
+.text-danger { color: var(--status-danger); }
+.text-cyan { color: var(--accent); }
+.mono { font-family: var(--font-mono); }
+
+/* Flex / display */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.ml-auto { margin-left: auto; }
+.w-full { width: 100%; }
+.flex-1 { flex: 1; }
+.p-0 { padding: 0; }
+
+/* Dot color variants — replaces per-instance background:var(--x) inline
+   styles on netmap-node/vlan-color-dot/timeline-dot with named classes. */
+.dot-cyan { background: var(--cyan-500); }
+.dot-green { background: var(--green-500); }
+.dot-amber { background: var(--amber-500); }
+.dot-gray { background: var(--gray-500); }
+.dot-glow-cyan { box-shadow: 0 0 10px var(--accent-glow); }
+.dot-glow-ok { box-shadow: 0 0 6px var(--status-ok-glow); }
+.dot-glow-ok-lg { box-shadow: 0 0 10px var(--status-ok-glow); }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Screen-reader-only — for labeling icon-only controls without visible text */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

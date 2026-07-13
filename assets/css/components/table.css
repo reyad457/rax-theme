@@ -1,0 +1,65 @@
+/**
+ * components/table.css — DataTable (+ IsolationMatrix variant)
+ * ------------------------------------------------------------------
+ * Purpose:      Every tabular view in the theme (firewall logs, DHCP
+ *               leases, aliases, NAT rules, alert logs, isolation
+ *               matrix).
+ * Responsibility: Presentation + horizontal-scroll responsive
+ *               fallback (Phase A found no responsive strategy for
+ *               wide tables — fixed in layout.css @640px + overflow
+ *               here).
+ * Public API:   .table-wrap, .data-table, .mono, .ip
+ * Dependencies: theme.css
+ */
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+/* Header region sitting above a flush (.card.p-0) table — zero bottom
+   padding so the header abuts the table's own top border. */
+.table-card-head {
+  padding: var(--space-7) var(--space-7) 0;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font: 500 var(--text-sm) var(--font-ui);
+}
+
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-raised);
+  text-align: left;
+  padding: var(--space-4) var(--space-5);
+  font: 600 var(--text-2xs) var(--font-ui);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--border-hairline);
+  white-space: nowrap;
+}
+
+.data-table tbody td {
+  padding: var(--space-3) var(--space-5);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-hairline);
+  white-space: nowrap;
+}
+
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background: var(--surface-overlay); }
+
+.data-table .mono { font-family: var(--font-mono); font-size: var(--text-xs); }
+.data-table .ip { color: var(--text-primary); }
+
+/* Sortable column affordance — RaxComponents.Table sets role="button" and
+   aria-sort on <th> when mounted with { sortable: true }. Cursor/arrow only
+   render for sortable/sorted headers, so pages that don't opt in are
+   visually identical to before (Phase D: exercising the Table component
+   without changing default appearance). */
+.data-table thead th[role='button'] { cursor: pointer; user-select: none; }
+.data-table thead th[aria-sort='ascending']::after { content: ' \25B2'; font-size: 9px; }
+.data-table thead th[aria-sort='descending']::after { content: ' \25BC'; font-size: 9px; }

@@ -1,0 +1,83 @@
+/**
+ * components/topbar.css — Topbar (+ SearchBox, CommandPaletteTrigger)
+ * ------------------------------------------------------------------
+ * Purpose:      Page title/breadcrumb + search + palette trigger +
+ *               theme toggle, rendered by
+ *               assets/js/components/topbar.js.
+ * Public API:   .topbar, .topbar-heading, .topbar-title,
+ *               .topbar-crumb, .topbar-search, .topbar-actions,
+ *               .topbar-icon-btn
+ * Dependencies: theme.css
+ */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-topbar);
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding: 0 var(--space-7);
+  background: color-mix(in srgb, var(--surface-base) 82%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.topbar-heading { min-width: 0; }
+.topbar-title {
+  font: 700 var(--text-lg) var(--font-ui);
+  color: var(--text-primary);
+}
+.topbar-crumb {
+  font: 500 var(--text-xs) var(--font-mono);
+  color: var(--text-tertiary);
+}
+
+.topbar-search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  max-width: 340px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-hairline);
+  background: var(--surface-overlay);
+  color: var(--text-tertiary);
+}
+.topbar-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font: 500 var(--text-sm) var(--font-ui);
+  color: var(--text-primary);
+}
+.topbar-search input::placeholder { color: var(--text-tertiary); }
+.topbar-search [data-lucide] { width: 15px; height: 15px; }
+.topbar-search kbd {
+  font: 600 var(--text-2xs) var(--font-mono);
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-hairline);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.topbar-actions { display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0; }
+
+.topbar-icon-btn {
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+}
+.topbar-icon-btn [data-lucide] { width: 16px; height: 16px; }
+.topbar-icon-btn:hover { background: var(--surface-overlay); color: var(--text-primary); }
+.topbar-icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 900px) {
+  .topbar-search { display: none; }
+}

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="RAX Theme — Interfaces & VLANs: physical ports, per-VLAN segments, and the inter-VLAN isolation matrix.">
+<title>RAX Theme — Interfaces &amp; VLANs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://unpkg.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="assets/css/variables.css">
+<link rel="stylesheet" href="assets/css/theme.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/layout.css">
+<link rel="stylesheet" href="assets/css/utilities.css">
+<link rel="stylesheet" href="assets/css/animations.css">
+<link rel="stylesheet" href="assets/css/components/card.css">
+<link rel="stylesheet" href="assets/css/components/badge.css">
+<link rel="stylesheet" href="assets/css/components/button.css">
+<link rel="stylesheet" href="assets/css/components/table.css">
+<link rel="stylesheet" href="assets/css/components/sidebar.css">
+<link rel="stylesheet" href="assets/css/components/topbar.css">
+<link rel="stylesheet" href="assets/css/components/toast.css">
+<link rel="stylesheet" href="assets/css/components/modal.css">
+<link rel="stylesheet" href="assets/css/components/command-palette.css">
+<script>
+  (function () {
+    try {
+      var p = JSON.parse(localStorage.getItem('rax-theme')) || {};
+      document.documentElement.setAttribute('data-mode', p.mode || 'dark');
+      document.documentElement.setAttribute('data-accent', p.accent || 'cyan');
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<div class="bg-grid"></div>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar-mount"></aside>
+
+  <div>
+    <header class="topbar" id="topbar-mount"></header>
+
+    <main class="page" id="main-content">
+
+      <!-- ===== Summary strip — rendered by RaxComponents.Card via pages/interfaces.js (Phase D) ===== -->
+      <div class="grid grid-4 mb-6">
+        <div id="card-phys"></div>
+        <div id="card-vlans"></div>
+        <div id="card-ports"></div>
+        <div id="card-devices"></div>
+      </div>
+
+      <!-- ===== Physical ports ===== -->
+      <div class="card mb-6">
+        <div class="card-head">
+          <div class="card-title-row"><i data-lucide="ethernet-port" aria-hidden="true"></i><span class="card-title">Physical Ports — HPE 1820-8G</span></div>
+          <span class="metric-label">Hover a port for its VLAN membership</span>
+        </div>
+        <div class="port-strip">
+          <div class="port-chip up" title="Trunk to OPNsense"><span class="dot" aria-hidden="true"></span>P1<span>Trunk</span></div>
+          <div class="port-chip up" title="Home VLAN access"><span class="dot" aria-hidden="true"></span>P2<span>Home</span></div>
+          <div class="port-chip up" title="Home VLAN access"><span class="dot" aria-hidden="true"></span>P3<span>Home</span></div>
+          <div class="port-chip up" title="IoT VLAN access"><span class="dot" aria-hidden="true"></span>P4<span>IoT</span></div>
+          <div class="port-chip up" title="CCTV VLAN access"><span class="dot" aria-hidden="true"></span>P5<span>CCTV</span></div>
+          <div class="port-chip up" title="Server VLAN access"><span class="dot" aria-hidden="true"></span>P6<span>Server</span></div>
+          <div class="port-chip up" title="Management VLAN access"><span class="dot" aria-hidden="true"></span>P7<span>Mgmt</span></div>
+          <div class="port-chip down" title="Unused"><span class="dot" aria-hidden="true"></span>P8<span>Unused</span></div>
+        </div>
+      </div>
+
+      <!-- ===== VLAN cards ===== -->
+      <div class="card-head mb-4">
+        <div class="card-title-row"><i data-lucide="network" aria-hidden="true"></i><span class="card-title text-md">VLAN Segments</span></div>
+        <button class="btn btn-primary"><i data-lucide="plus" aria-hidden="true"></i>Add VLAN</button>
+      </div>
+
+      <div class="grid grid-3 mb-6">
+
+        <div class="vlan-card">
+          <div class="vlan-head">
+            <div class="vlan-name"><span class="vlan-color-dot" style="background:var(--cyan-500);"></span>Management</div>
+            <span class="pill pill-ok"><span class="pill-dot"></span>Up</span>
+          </div>
+          <div class="vlan-meta"><span>VLAN ID</span><span>10</span></div>
+          <div class="vlan-meta"><span>Subnet</span><span>10.10.10.0/24</span></div>
+          <div class="vlan-meta"><span>Gateway</span><span>10.10.10.1</span></div>
+          <div class="vlan-meta"><span>Devices</span><span>3</span></div>
+          <div class="mt-3">
+            <div class="bar-track"><div class="bar-fill" style="--fill:12;"></div></div>
+          </div>
+        </div>
+
+        <div class="vlan-card">
+          <div class="vlan-head">
+            <div class="vlan-name"><span class="vlan-color-dot" style="background:var(--green-500);"></span>Home</div>
+            <span class="pill pill-ok"><span class="pill-dot"></span>Up</span>
+          </div>
+          <div class="vlan-meta"><span>VLAN ID</span><span>20</span></div>
+          <div class="vlan-meta"><span>Subnet</span><span>10.10.20.0/24</span></div>
+          <div class="vlan-meta"><span>Gateway</span><span>10.10.20.1</span></div>
+          <div class="vlan-meta"><span>Devices</span><span>412</span></div>
+          <div class="mt-3">
+            <div class="bar-track"><div class="bar-fill" style="--fill:64;"></div></div>
+          </div>
+        </div>
+
+        <div class="vlan-card">
+          <div class="vlan-head">
+            <div class="vlan-name"><span class="vlan-color-dot" style="background:var(--amber-500);"></span>IoT</div>
+            <span class="pill pill-ok"><span class="pill-dot"></span>Up</span>
+          </div>
+          <div class="vlan-meta"><span>VLAN ID</span><span>30</span></div>
+          <div class="vlan-meta"><span>Subnet</span><span>10.10.30.0/24</span></div>
+          <div class="vlan-meta"><span>Gateway</span><span>10.10.30.1</span></div>
+          <div class="vlan-meta"><span>Devices</span><span>138</span></div>
+          <div class="mt-3">
+            <div class="bar-track"><div class="bar-fill warn" style="--fill:38;"></div></div>
+          </div>
+        </div>
+
+        <!-- CCTV: VLAN ID corrected to 50 to match its 10.10.50.0/24 subnet, consistent
+             with how every other VLAN card + dashboard.html + logs.html reference this
+             segment (Phase A audit finding — VLAN ID/subnet were swapped vs. Server). -->
+        <div class="vlan-card">
+          <div class="vlan-head">
+            <div class="vlan-name"><span class="vlan-color-dot" style="background:var(--cyan-500);"></span>CCTV</div>
+            <span class="pill pill-ok"><span class="pill-dot"></span>Up</span>
+          </div>
+          <div class="vlan-meta"><span>VLAN ID</span><span>50</span></div>
+          <div class="vlan-meta"><span>Subnet</span><span>10.10.50.0/24</span></div>
+          <div class="vlan-meta"><span>Gateway</span><span>10.10.50.1</span></div>
+          <div class="vlan-meta"><span>Devices</span><span>26</span></div>
+          <div class="mt-3">
+            <div class="bar-track"><div class="bar-fill" style="--fill:22;"></div></div>
+          </div>
+        </div>
+
+        <!-- Server: VLAN ID corrected to 40 to match its 10.10.40.0/24 subnet — see note above. -->
+        <div class="vlan-card">
+          <div class="vlan-head">
+            <div class="vlan-name"><span class="vlan-color-dot" style="background:var(--green-500);"></span>Server</div>
+            <span class="pill pill-ok"><span class="pill-dot"></span>Up</span>
+          </div>
+          <div class="vlan-meta"><span>VLAN ID</span><span>40</span></div>
+          <div class="vlan-meta"><span>Subnet</span><span>10.10.40.0/24</span></div>
+          <div class="vlan-meta"><span>Gateway</span><span>10.10.40.1</span></div>
+          <div class="vlan-meta"><span>Devices</span><span>54</span></div>
+          <div class="mt-3">
+            <div class="bar-track"><div class="bar-fill" style="--fill:31;"></div></div>
+          </div>
+        </div>
+
+        <div class="vlan-card">
+          <div class="vlan-head">
+            <div class="vlan-name"><span class="vlan-color-dot" style="background:var(--gray-500);"></span>Guest</div>
+            <span class="pill pill-ok"><span class="pill-dot"></span>Up</span>
+          </div>
+          <div class="vlan-meta"><span>VLAN ID</span><span>60</span></div>
+          <div class="vlan-meta"><span>Subnet</span><span>10.10.60.0/24</span></div>
+          <div class="vlan-meta"><span>Gateway</span><span>10.10.60.1</span></div>
+          <div class="vlan-meta"><span>Devices</span><span>9</span></div>
+          <div class="mt-3">
+            <div class="bar-track"><div class="bar-fill" style="--fill:6;"></div></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== Isolation matrix ===== -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title-row"><i data-lucide="shield-check" aria-hidden="true"></i><span class="card-title">Inter-VLAN Isolation</span></div>
+        </div>
+        <div class="table-wrap" id="isolationTable">
+          <table class="data-table">
+            <thead><tr><th>From \ To</th><th>Management</th><th>Home</th><th>IoT</th><th>CCTV</th><th>Server</th><th>Guest</th></tr></thead>
+            <tbody>
+              <tr><td>Management</td><td class="text-ok mono">Allow</td><td class="text-ok mono">Allow</td><td class="text-ok mono">Allow</td><td class="text-ok mono">Allow</td><td class="text-ok mono">Allow</td><td class="text-ok mono">Allow</td></tr>
+              <tr><td>Home</td><td class="text-danger mono">Block</td><td class="text-ok mono">Allow</td><td class="text-danger mono">Block</td><td class="text-danger mono">Block</td><td class="text-warn mono">Limited</td><td class="text-danger mono">Block</td></tr>
+              <tr><td>IoT</td><td class="text-danger mono">Block</td><td class="text-danger mono">Block</td><td class="text-ok mono">Allow</td><td class="text-danger mono">Block</td><td class="text-danger mono">Block</td><td class="text-danger mono">Block</td></tr>
+              <tr><td>CCTV</td><td class="text-danger mono">Block</td><td class="text-danger mono">Block</td><td class="text-danger mono">Block</td><td class="text-ok mono">Allow</td><td class="text-warn mono">Limited</td><td class="text-danger mono">Block</td></tr>
+              <tr><td>Server</td><td class="text-danger mono">Block</td><td class="text-warn mono">Limited</td><td class="text-danger mono">Block</td><td class="text-warn mono">Limited</td><td class="text-ok mono">Allow</td><td class="text-danger mono">Block</td></tr>
+              <tr><td>Guest</td><td class="text-danger mono">Block</td><td class="text-danger mono">Block</td><td class="text-danger mono">Block</td><td class="text-danger mono">Block</td><td class="text-danger mono">Block</td><td class="text-ok mono">Allow</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast-stack-mount" class="toast-stack" aria-live="polite"></div>
+<div id="modal-host-mount"></div>
+
+<script src="assets/js/events.js"></script>
+<script src="assets/js/registry.js"></script>
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/components/sidebar.js"></script>
+<script src="assets/js/components/topbar.js"></script>
+<script src="assets/js/components/card.js"></script>
+<script src="assets/js/components/widget.js"></script>
+<script src="assets/js/components/modal.js"></script>
+<script src="assets/js/components/table.js"></script>
+<script src="assets/js/components/tabs.js"></script>
+<script src="assets/js/components/toast.js"></script>
+<script src="assets/js/notifications.js"></script>
+<script src="assets/js/search.js"></script>
+<script src="assets/js/command-palette.js"></script>
+<script src="assets/js/navigation.js"></script>
+<script src="assets/js/menu-config.js"></script>
+<script src="assets/js/commands-config.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/pages/interfaces.js"></script>
+<script>
+  RaxNavigation.mount({ active: 'interfaces', title: 'Interfaces & VLANs', crumb: '/ Network / Interfaces', search: 'Search VLANs, subnets…' });
+  RaxCore.boot();
+</script>
+</body>
+</html>

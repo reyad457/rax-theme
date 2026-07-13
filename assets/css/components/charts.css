@@ -1,0 +1,56 @@
+/**
+ * components/charts.css — ChartCard + inline bar/progress primitive
+ * ------------------------------------------------------------------
+ * Purpose:      Canvas mount styling for Chart.js instances (owned
+ *               exclusively by assets/js/charts.js — RaxCharts), plus
+ *               the lightweight bar-track/bar-fill primitive used for
+ *               severity breakdowns and gateway health rows.
+ * Responsibility: Presentation only — no chart data or Chart.js calls
+ *               live here.
+ * Public API:   .chart-mount, .bar-track, .bar-fill, .sev-row,
+ *               .sev-label, .sev-count, .filter-bar
+ * Dependencies: theme.css
+ */
+
+.chart-mount { position: relative; width: 100%; }
+.chart-mount canvas { display: block; }
+
+/* Skeleton shown by RaxCharts before a lazily-observed chart mounts
+   (Phase B §7 lazy-init strategy). */
+.chart-mount[data-loading='true'] {
+  border-radius: var(--radius-md);
+}
+
+.bar-track {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--surface-overlay);
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  width: calc(var(--fill, 0) * 1%);
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  transition: width var(--duration-slow) var(--ease-decelerate);
+}
+.bar-fill.warn { background: var(--status-warn); box-shadow: 0 0 8px var(--status-warn-glow); }
+.bar-fill.danger { background: var(--status-danger); box-shadow: 0 0 8px var(--status-danger-glow); }
+
+.sev-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+.sev-label { width: 56px; flex-shrink: 0; font: 600 var(--text-xs) var(--font-ui); }
+.sev-count { width: 24px; text-align: right; font: 600 var(--text-xs) var(--font-mono); color: var(--text-tertiary); }
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}

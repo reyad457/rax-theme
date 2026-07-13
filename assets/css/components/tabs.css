@@ -1,0 +1,33 @@
+/**
+ * components/tabs.css — Tabs
+ * ------------------------------------------------------------------
+ * Purpose:      Tabbed views (logs.html: firewall/DHCP/aliases/NAT).
+ * Responsibility: Presentation of role="tablist" markup rendered by
+ *               assets/js/components/tabs.js. Fixes the Phase A gap
+ *               where tabs had no ARIA semantics.
+ * Public API:   .tabbar, .tab-btn, .tab-panel
+ * Dependencies: theme.css
+ */
+
+.tabbar {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.tab-btn {
+  padding: var(--space-3) var(--space-5);
+  font: 600 var(--text-sm) var(--font-ui);
+  color: var(--text-tertiary);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--duration-fast) var(--ease-standard),
+              border-color var(--duration-fast) var(--ease-standard);
+}
+.tab-btn:hover { color: var(--text-primary); }
+.tab-btn[aria-selected='true'] { color: var(--accent); border-color: var(--accent); }
+.tab-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.tab-panel { display: none; }
+.tab-panel[data-active='true'] { display: block; }

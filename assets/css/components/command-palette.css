@@ -1,0 +1,62 @@
+/**
+ * components/command-palette.css — CommandPalette
+ * ------------------------------------------------------------------
+ * Purpose:      ⌘K overlay, registry-driven page/command jump list.
+ *               Not present in Phase 1, ships now per Phase B §4.7
+ *               since it's also the accessibility-first path to every
+ *               registered action.
+ * Public API:   .cmdk-backdrop, .cmdk, .cmdk-input, .cmdk-list,
+ *               .cmdk-item
+ * Dependencies: theme.css, animations.css
+ */
+
+.cmdk-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-command-palette);
+  background: var(--overlay-scrim);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 14vh;
+}
+
+.cmdk {
+  width: 100%;
+  max-width: 560px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+}
+
+.cmdk-input {
+  width: 100%;
+  padding: var(--space-5) var(--space-6);
+  border: none;
+  border-bottom: 1px solid var(--border-hairline);
+  background: transparent;
+  outline: none;
+  font: 500 var(--text-md) var(--font-ui);
+  color: var(--text-primary);
+}
+.cmdk-input::placeholder { color: var(--text-tertiary); }
+
+.cmdk-list { max-height: 340px; overflow-y: auto; padding: var(--space-2); }
+
+.cmdk-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font: 600 var(--text-sm) var(--font-ui);
+  color: var(--text-secondary);
+}
+.cmdk-item [data-lucide] { width: 15px; height: 15px; color: var(--text-tertiary); }
+.cmdk-item[data-active='true'] {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--text-primary);
+}
+.cmdk-item[data-active='true'] [data-lucide] { color: var(--accent); }

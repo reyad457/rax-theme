@@ -1,0 +1,165 @@
+/**
+ * theme.css — Tier 2: SEMANTIC TOKENS + THEME RESOLUTION
+ * ------------------------------------------------------------------
+ * Purpose:      Assigns meaning to primitives. This is the only file
+ *               components are allowed to pull color/role values
+ *               from.
+ * Responsibility: Resolve two orthogonal axes onto semantic roles:
+ *                 - data-mode  ("dark" default | "light")
+ *                 - data-accent ("cyan" default | "emerald" | "purple"
+ *                   | "red" | "orange")
+ * Public API:   --surface-*, --text-*, --border-*, --accent,
+ *               --accent-glow, --status-*, --chart-series-*
+ * Dependencies: variables.css (Tier 1 primitives only)
+ * Extension:    Add a new named accent by adding one more
+ *               [data-accent="name"] block. Add a new mode the same
+ *               way. Never introduces a new primitive here — pull
+ *               from variables.css.
+ * ------------------------------------------------------------------
+ * RaxTheme (assets/js/theme.js) is the ONLY module permitted to write
+ * the data-mode / data-accent attributes on <html>. Everything below
+ * is pure CSS resolution with no JS-driven color logic.
+ */
+
+/* ---- Mode: dark (default) -------------------------------------------- */
+html,
+html[data-mode='dark'] {
+  --surface-base: var(--gray-975);
+  --surface-raised: var(--gray-925);
+  --surface-overlay: var(--gray-900);
+  --surface-sunken: var(--gray-1000);
+
+  --border-hairline: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  --text-primary: var(--gray-100);
+  --text-secondary: var(--gray-300);
+  --text-tertiary: var(--gray-500);
+  --text-inverse: var(--gray-975);
+
+  --overlay-scrim: rgba(5, 6, 8, 0.72);
+  --skeleton-base: var(--gray-800);
+  --skeleton-shine: rgba(255, 255, 255, 0.06);
+}
+
+/* ---- Mode: light -------------------------------------------------------
+   Ships now (per Phase B §8 high-contrast/theming strategy) even though
+   Phase 1 never rendered it, so the semantic layer is proven bidirectional
+   before any component ships. */
+html[data-mode='light'] {
+  --surface-base: var(--gray-50);
+  --surface-raised: #FFFFFF;
+  --surface-overlay: var(--gray-100);
+  --surface-sunken: var(--gray-100);
+
+  --border-hairline: rgba(10, 14, 20, 0.10);
+  --border-strong: rgba(10, 14, 20, 0.20);
+
+  --text-primary: var(--gray-975);
+  --text-secondary: var(--gray-700);
+  --text-tertiary: var(--gray-500);
+  --text-inverse: var(--gray-50);
+
+  --overlay-scrim: rgba(10, 14, 20, 0.45);
+  --skeleton-base: var(--gray-200);
+  --skeleton-shine: rgba(10, 14, 20, 0.06);
+}
+
+/* ---- Status roles — identical across modes/accents on purpose --------
+   Status color must never change with theme; only the accent does. */
+:root {
+  --status-ok: var(--green-500);
+  --status-ok-glow: rgba(0, 255, 157, 0.35);
+  --status-warn: var(--amber-500);
+  --status-warn-glow: rgba(255, 200, 87, 0.30);
+  --status-danger: var(--red-500);
+  --status-danger-glow: rgba(255, 59, 92, 0.35);
+  --status-info: var(--cyan-500);
+  --status-info-glow: rgba(0, 217, 255, 0.30);
+}
+
+/* ---- Accent: cyan (default) -------------------------------------------- */
+html,
+html[data-accent='cyan'] {
+  --accent: var(--cyan-500);
+  --accent-strong: var(--cyan-600);
+  --accent-glow: rgba(0, 217, 255, 0.35);
+  --chart-series-1: var(--cyan-500);
+  --chart-series-2: var(--green-500);
+  --chart-series-3: var(--amber-500);
+  --chart-series-4: var(--gray-500);
+}
+
+/* ---- Accent: emerald ---------------------------------------------------- */
+html[data-accent='emerald'] {
+  --accent: var(--green-500);
+  --accent-strong: var(--green-600);
+  --accent-glow: rgba(0, 255, 157, 0.35);
+  --chart-series-1: var(--green-500);
+  --chart-series-2: var(--cyan-500);
+  --chart-series-3: var(--amber-500);
+  --chart-series-4: var(--gray-500);
+}
+
+/* ---- Accent: purple ------------------------------------------------------ */
+html[data-accent='purple'] {
+  --accent: var(--purple-500);
+  --accent-strong: var(--purple-600);
+  --accent-glow: rgba(167, 139, 250, 0.35);
+  --chart-series-1: var(--purple-500);
+  --chart-series-2: var(--cyan-500);
+  --chart-series-3: var(--amber-500);
+  --chart-series-4: var(--gray-500);
+}
+
+/* ---- Accent: red --------------------------------------------------------- */
+html[data-accent='red'] {
+  --accent: var(--red-500);
+  --accent-strong: var(--red-600);
+  --accent-glow: rgba(255, 59, 92, 0.35);
+  --chart-series-1: var(--red-500);
+  --chart-series-2: var(--cyan-500);
+  --chart-series-3: var(--amber-500);
+  --chart-series-4: var(--gray-500);
+}
+
+/* ---- Accent: orange ------------------------------------------------------- */
+html[data-accent='orange'] {
+  --accent: var(--orange-500);
+  --accent-strong: var(--orange-600);
+  --accent-glow: rgba(255, 154, 50, 0.35);
+  --chart-series-1: var(--orange-500);
+  --chart-series-2: var(--cyan-500);
+  --chart-series-3: var(--amber-500);
+  --chart-series-4: var(--gray-500);
+}
+
+/* ---- Accent: custom -------------------------------------------------------
+   A developer/integrator sets --accent and --accent-glow inline on <html>
+   (or via RaxTheme.setCustomAccent(hex)); this block only supplies a
+   fallback chart palette so charts don't break if only the accent color
+   was provided. */
+html[data-accent='custom'] {
+  --chart-series-1: var(--accent, var(--cyan-500));
+  --chart-series-2: var(--green-500);
+  --chart-series-3: var(--amber-500);
+  --chart-series-4: var(--gray-500);
+}
+
+/* ---- High contrast support ---------------------------------------------
+   Bumps semantic text/border tokens app-wide. No component file needs to
+   know this media query exists. */
+@media (prefers-contrast: more) {
+  html[data-mode='dark'] {
+    --text-secondary: var(--gray-100);
+    --text-tertiary: var(--gray-200);
+    --border-hairline: rgba(255, 255, 255, 0.20);
+    --border-strong: rgba(255, 255, 255, 0.32);
+  }
+  html[data-mode='light'] {
+    --text-secondary: var(--gray-975);
+    --text-tertiary: var(--gray-800);
+    --border-hairline: rgba(10, 14, 20, 0.24);
+    --border-strong: rgba(10, 14, 20, 0.40);
+  }
+}

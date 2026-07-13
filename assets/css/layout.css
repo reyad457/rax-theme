@@ -1,0 +1,127 @@
+/**
+ * layout.css — LAYOUT PRIMITIVES
+ * ------------------------------------------------------------------
+ * Purpose:      App shell structure + the grid system every page
+ *               composes its cards with (.grid, .grid-3, .grid-4,
+ *               .span-2/3/4).
+ * Responsibility: Structural layout ONLY — no component appearance
+ *               decisions live here (that's components/*.css).
+ * Public API:   .app-shell, .sidebar, .page, .grid, .grid-3, .grid-4,
+ *               .span-2, .span-3, .span-4, .bg-grid
+ * Dependencies: theme.css (semantic tokens only)
+ * Extension:    Add new grid variants here if a page genuinely needs
+ *               a layout primitive no existing page uses. Do not add
+ *               component-specific spacing here — that belongs in
+ *               the component's own file.
+ * ------------------------------------------------------------------
+ * Breakpoints (documented — Phase A found none existed):
+ *   --bp-sm: 640px   stacked single column, sidebar becomes overlay
+ *   --bp-md: 900px   2-column grids collapse to 1
+ *   --bp-lg: 1200px  full grid-3/grid-4 layouts active
+ */
+
+:root {
+  --bp-sm: 640px;
+  --bp-md: 900px;
+  --bp-lg: 1200px;
+
+  --sidebar-width: 240px;
+  --sidebar-width-collapsed: 72px;
+  --topbar-height: 64px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--surface-base);
+}
+
+/* Decorative background grid — purely cosmetic, kept out of components/ since
+   it belongs to the page canvas, not to any one widget. */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-base);
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--border-hairline) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-hairline) 1px, transparent 1px);
+  background-size: 42px 42px;
+  opacity: 0.35;
+}
+
+/* ---- App shell --------------------------------------------------------- */
+.app-shell {
+  position: relative;
+  z-index: var(--z-sticky);
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  min-height: 100vh;
+  transition: grid-template-columns var(--duration-base) var(--ease-standard);
+}
+
+body[data-sidebar='collapsed'] .app-shell {
+  grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+}
+
+.page {
+  padding: var(--space-7);
+  max-width: 1600px;
+}
+
+/* Skip-to-content link — visually hidden until focused (Phase A a11y gap) */
+.skip-link {
+  position: absolute;
+  top: -48px;
+  left: var(--space-3);
+  z-index: var(--z-command-palette);
+  background: var(--accent);
+  color: var(--text-inverse);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  font: 600 var(--text-sm) var(--font-ui);
+  transition: top var(--duration-fast) var(--ease-decelerate);
+}
+.skip-link:focus {
+  top: var(--space-3);
+}
+
+/* ---- Grid system -------------------------------------------------------- */
+.grid {
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: repeat(4, 1fr);
+}
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+.span-2 { grid-column: span 2; }
+.span-3 { grid-column: span 3; }
+.span-4 { grid-column: span 4; }
+
+@media (max-width: 1200px) {
+  .grid-4, .grid.grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .span-3, .span-4 { grid-column: span 2; }
+}
+
+@media (max-width: 900px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    transform: translateX(-100%);
+    transition: transform var(--duration-base) var(--ease-standard);
+  }
+  body[data-sidebar='open'] .sidebar { transform: translateX(0); }
+  .grid, .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .span-2, .span-3, .span-4 { grid-column: span 2; }
+}
+
+@media (max-width: 640px) {
+  .page { padding: var(--space-5); }
+  .grid, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .span-2, .span-3, .span-4 { grid-column: span 1; }
+  /* Wide data tables become horizontally scrollable rather than
+     silently clipping — Phase A responsive gap fix. */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}

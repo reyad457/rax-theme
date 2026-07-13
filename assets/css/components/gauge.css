@@ -1,0 +1,64 @@
+/**
+ * components/gauge.css — GaugeWidget (extends Card)
+ * ------------------------------------------------------------------
+ * Purpose:      Ring-gauge visualization (CPU/RAM/Disk/Temp on the
+ *               dashboard).
+ * Responsibility: Presentation only. The stroke-dashoffset percentage
+ *               is set by JS (components/widget.js) via the
+ *               --gauge-percent custom property — CSS owns the fixed
+ *               rule that reads it, so updates never touch inline
+ *               `style` attributes directly (Phase B §7: avoid
+ *               layout thrash / repeated style writes).
+ * Public API:   .gauge-wrap, .gauge, .gauge-track, .gauge-value,
+ *               .gauge-label
+ * Dependencies: theme.css
+ */
+
+:root {
+  --gauge-size: 76px;
+  --gauge-radius: 32px;
+  --gauge-circumference: 201.06; /* 2 * PI * 32, precomputed */
+}
+
+.gauge-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.gauge {
+  position: relative;
+  width: var(--gauge-size);
+  height: var(--gauge-size);
+  flex-shrink: 0;
+  /* set by widget.js: style="--gauge-percent: 34" */
+  --gauge-percent: 0;
+}
+
+.gauge-track {
+  fill: none;
+  stroke: var(--border-hairline);
+  stroke-width: 6;
+}
+
+.gauge-value {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  stroke-dasharray: var(--gauge-circumference);
+  stroke-dashoffset: calc(var(--gauge-circumference) * (1 - (var(--gauge-percent) / 100)));
+  transition: stroke-dashoffset var(--duration-slow) var(--ease-decelerate);
+}
+
+.gauge-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 var(--text-md) var(--font-ui);
+  color: var(--text-primary);
+}

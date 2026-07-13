@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="RAX Theme — Logs & Tables: firewall logs, DHCP leases, aliases, and NAT rules.">
+<title>RAX Theme — Logs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://unpkg.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="assets/css/variables.css">
+<link rel="stylesheet" href="assets/css/theme.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/layout.css">
+<link rel="stylesheet" href="assets/css/utilities.css">
+<link rel="stylesheet" href="assets/css/animations.css">
+<link rel="stylesheet" href="assets/css/components/card.css">
+<link rel="stylesheet" href="assets/css/components/badge.css">
+<link rel="stylesheet" href="assets/css/components/button.css">
+<link rel="stylesheet" href="assets/css/components/table.css">
+<link rel="stylesheet" href="assets/css/components/sidebar.css">
+<link rel="stylesheet" href="assets/css/components/topbar.css">
+<link rel="stylesheet" href="assets/css/components/charts.css">
+<link rel="stylesheet" href="assets/css/components/toast.css">
+<link rel="stylesheet" href="assets/css/components/modal.css">
+<link rel="stylesheet" href="assets/css/components/tabs.css">
+<link rel="stylesheet" href="assets/css/components/command-palette.css">
+<script>
+  (function () {
+    try {
+      var p = JSON.parse(localStorage.getItem('rax-theme')) || {};
+      document.documentElement.setAttribute('data-mode', p.mode || 'dark');
+      document.documentElement.setAttribute('data-accent', p.accent || 'cyan');
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<div class="bg-grid"></div>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar-mount"></aside>
+
+  <div>
+    <header class="topbar" id="topbar-mount"></header>
+
+    <main class="page" id="main-content">
+
+      <!-- Tabs: markup authored plain (tabbar/tab-btn/tab-panel); RaxComponents.Tabs
+           (mounted by pages/logs.js) adds role="tablist"/aria-selected/aria-controls
+           and hash-routing — fixes the Phase A a11y gap where this was a bespoke,
+           non-accessible inline script. -->
+      <div class="tabbar">
+        <button class="tab-btn" data-tab="fwlogs">Firewall logs</button>
+        <button class="tab-btn" data-tab="dhcp">DHCP leases</button>
+        <button class="tab-btn" data-tab="aliases">Aliases</button>
+        <button class="tab-btn" data-tab="nat">NAT rules</button>
+      </div>
+
+      <!-- FIREWALL LOGS -->
+      <div class="tab-panel" id="fwlogs">
+        <div class="filter-bar">
+          <button class="btn btn-ghost"><i data-lucide="filter" aria-hidden="true"></i>Interface: All</button>
+          <button class="btn btn-ghost"><i data-lucide="calendar" aria-hidden="true"></i>Last 1 hour</button>
+          <button class="btn btn-primary ml-auto"><i data-lucide="download" aria-hidden="true"></i>Export</button>
+        </div>
+        <div class="card p-0">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Time</th><th>Action</th><th>Interface</th><th>Source</th><th>Destination</th><th>Proto</th><th>Rule</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="mono">14:22:03</td><td><span class="pill pill-danger">Block</span></td><td>WAN</td><td class="mono ip">103.219.44.7:51322</td><td class="mono ip">10.10.40.2:22</td><td>TCP</td><td>Default deny</td></tr>
+                <tr><td class="mono">14:21:58</td><td><span class="pill pill-ok">Pass</span></td><td>Home</td><td class="mono ip">10.10.20.14:52210</td><td class="mono ip">142.250.72.14:443</td><td>TCP</td><td>Home → WAN</td></tr>
+                <tr><td class="mono">14:21:40</td><td><span class="pill pill-danger">Block</span></td><td>IoT</td><td class="mono ip">10.10.30.8:33210</td><td class="mono ip">8.8.8.8:53</td><td>UDP</td><td>IoT DNS isolation</td></tr>
+                <tr><td class="mono">14:21:12</td><td><span class="pill pill-warn">Log</span></td><td>Guest</td><td class="mono ip">10.10.60.4:44120</td><td class="mono ip">192.168.1.1:80</td><td>TCP</td><td>Guest isolation</td></tr>
+                <tr><td class="mono">14:20:55</td><td><span class="pill pill-ok">Pass</span></td><td>Server</td><td class="mono ip">10.10.40.2:8080</td><td class="mono ip">10.10.20.14:51012</td><td>TCP</td><td>NetPulse dashboard</td></tr>
+                <tr><td class="mono">14:20:30</td><td><span class="pill pill-danger">Block</span></td><td>WAN</td><td class="mono ip">45.134.26.91:443</td><td class="mono ip">10.10.10.1:443</td><td>TCP</td><td>Suricata IPS drop</td></tr>
+                <tr><td class="mono">14:20:02</td><td><span class="pill pill-ok">Pass</span></td><td>CCTV</td><td class="mono ip">10.10.50.5:554</td><td class="mono ip">10.10.40.9:8554</td><td>TCP</td><td>NVR → recorder</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- DHCP LEASES -->
+      <div class="tab-panel" id="dhcp">
+        <div class="filter-bar">
+          <button class="btn btn-ghost"><i data-lucide="filter" aria-hidden="true"></i>VLAN: All</button>
+          <button class="btn btn-primary ml-auto"><i data-lucide="refresh-cw" aria-hidden="true"></i>Refresh</button>
+        </div>
+        <div class="card p-0">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Hostname</th><th>IP address</th><th>MAC</th><th>VLAN</th><th>Lease ends</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>rax-workstation</td><td class="mono ip">10.10.20.14</td><td class="mono">3C:A1:2B:9E:0F:11</td><td>Home</td><td class="mono">08h 42m</td><td><span class="pill pill-ok">Active</span></td></tr>
+                <tr><td>nvr-cctv-01</td><td class="mono ip">10.10.50.5</td><td class="mono">A4:5E:60:D2:71:03</td><td>CCTV</td><td class="mono">Static</td><td><span class="pill pill-ok">Active</span></td></tr>
+                <tr><td>iot-hub-bridge</td><td class="mono ip">10.10.30.8</td><td class="mono">F0:9F:C2:11:8A:5D</td><td>IoT</td><td class="mono">03h 12m</td><td><span class="pill pill-ok">Active</span></td></tr>
+                <tr><td>unknown-device</td><td class="mono ip">10.10.30.19</td><td class="mono">DC:44:6D:9B:02:EE</td><td>IoT</td><td class="mono">00h 58m</td><td><span class="pill pill-warn">Unverified</span></td></tr>
+                <tr><td>guest-phone-a3</td><td class="mono ip">10.10.60.12</td><td class="mono">88:C6:26:4F:1A:77</td><td>Guest</td><td class="mono">01h 30m</td><td><span class="pill pill-ok">Active</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALIASES -->
+      <div class="tab-panel" id="aliases">
+        <div class="filter-bar">
+          <button class="btn btn-primary ml-auto"><i data-lucide="plus" aria-hidden="true"></i>New alias</button>
+        </div>
+        <div class="card p-0">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Type</th><th>Content</th><th>Used by</th><th>Updated</th></tr></thead>
+              <tbody>
+                <tr><td class="ip">IOT_DEVICES</td><td>Network</td><td class="mono">10.10.30.0/24</td><td>4 rules</td><td class="mono">2 days ago</td></tr>
+                <tr><td class="ip">CROWDSEC_BLOCKLIST</td><td>External URL</td><td class="mono">crowdsec://community-blocklist</td><td>1 rule</td><td class="mono">1 hour ago</td></tr>
+                <tr><td class="ip">MGMT_HOSTS</td><td>Host</td><td class="mono">10.10.99.10, 10.10.99.11</td><td>6 rules</td><td class="mono">5 days ago</td></tr>
+                <tr><td class="ip">CCTV_NVR</td><td>Host</td><td class="mono">10.10.50.5</td><td>2 rules</td><td class="mono">2 weeks ago</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- NAT -->
+      <div class="tab-panel" id="nat">
+        <div class="filter-bar">
+          <button class="btn btn-primary ml-auto"><i data-lucide="plus" aria-hidden="true"></i>New NAT rule</button>
+        </div>
+        <div class="card p-0">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Interface</th><th>Source</th><th>Dest.</th><th>Redirect target</th><th>Description</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>WAN</td><td class="mono">*</td><td class="mono ip">203.0.113.4:8443</td><td class="mono ip">10.10.40.2:8443</td><td>NetPulse remote access</td><td><span class="pill pill-ok">Enabled</span></td></tr>
+                <tr><td>WAN</td><td class="mono">*</td><td class="mono ip">203.0.113.4:51820</td><td class="mono ip">10.10.10.1:51820</td><td>Tailscale relay</td><td><span class="pill pill-ok">Enabled</span></td></tr>
+                <tr><td>WAN</td><td class="mono">*</td><td class="mono ip">203.0.113.4:554</td><td class="mono ip">10.10.50.5:554</td><td>NVR remote stream (disabled)</td><td><span class="pill pill-danger">Disabled</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast-stack-mount" class="toast-stack" aria-live="polite"></div>
+<div id="modal-host-mount"></div>
+
+<script src="assets/js/events.js"></script>
+<script src="assets/js/registry.js"></script>
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/components/sidebar.js"></script>
+<script src="assets/js/components/topbar.js"></script>
+<script src="assets/js/components/card.js"></script>
+<script src="assets/js/components/widget.js"></script>
+<script src="assets/js/components/modal.js"></script>
+<script src="assets/js/components/table.js"></script>
+<script src="assets/js/components/tabs.js"></script>
+<script src="assets/js/components/toast.js"></script>
+<script src="assets/js/notifications.js"></script>
+<script src="assets/js/search.js"></script>
+<script src="assets/js/command-palette.js"></script>
+<script src="assets/js/navigation.js"></script>
+<script src="assets/js/menu-config.js"></script>
+<script src="assets/js/commands-config.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/pages/logs.js"></script>
+<script>
+  RaxNavigation.mount({ active: 'logs', title: 'Logs & Tables', crumb: '/ Firewall / Logs', search: 'Filter by IP, port, action…' });
+  RaxCore.boot();
+</script>
+</body>
+</html>

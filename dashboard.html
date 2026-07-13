@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="RAX Theme dashboard — real-time overview of firewall, VLANs, VPN, and security engine status.">
+<title>RAX Theme — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="stylesheet" href="assets/css/variables.css">
+<link rel="stylesheet" href="assets/css/theme.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/layout.css">
+<link rel="stylesheet" href="assets/css/utilities.css">
+<link rel="stylesheet" href="assets/css/animations.css">
+<link rel="stylesheet" href="assets/css/components/card.css">
+<link rel="stylesheet" href="assets/css/components/badge.css">
+<link rel="stylesheet" href="assets/css/components/gauge.css">
+<link rel="stylesheet" href="assets/css/components/button.css">
+<link rel="stylesheet" href="assets/css/components/table.css">
+<link rel="stylesheet" href="assets/css/components/form.css">
+<link rel="stylesheet" href="assets/css/components/sidebar.css">
+<link rel="stylesheet" href="assets/css/components/topbar.css">
+<link rel="stylesheet" href="assets/css/components/charts.css">
+<link rel="stylesheet" href="assets/css/components/toast.css">
+<link rel="stylesheet" href="assets/css/components/modal.css">
+<link rel="stylesheet" href="assets/css/components/tabs.css">
+<link rel="stylesheet" href="assets/css/components/command-palette.css">
+<script>
+  /* Flash-of-wrong-theme prevention — applies the persisted mode/accent
+     before first paint. RaxTheme.init() re-applies the same values once
+     theme.js loads, so both paths stay in sync (see assets/js/theme.js). */
+  (function () {
+    try {
+      var p = JSON.parse(localStorage.getItem('rax-theme')) || {};
+      document.documentElement.setAttribute('data-mode', p.mode || 'dark');
+      document.documentElement.setAttribute('data-accent', p.accent || 'cyan');
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<div class="bg-grid"></div>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar-mount"></aside>
+
+  <div>
+    <header class="topbar" id="topbar-mount"></header>
+
+    <main class="page" id="main-content">
+
+      <!-- ===== Summary strip — rendered by RaxComponents.Card via pages/dashboard.js (Phase D) ===== -->
+      <div class="grid grid-4 mb-6">
+        <div id="card-firewall"></div>
+        <div id="card-wan"></div>
+        <div id="card-lan"></div>
+        <div id="card-vpn"></div>
+      </div>
+
+      <!-- ===== System vitals — rendered by RaxComponents.Widget via pages/dashboard.js (Phase D) ===== -->
+      <div class="grid grid-4 mb-6">
+        <div class="card" id="gauge-cpu"></div>
+        <div class="card" id="gauge-mem"></div>
+        <div class="card" id="gauge-disk"></div>
+        <div class="card" id="gauge-temp"></div>
+      </div>
+
+      <!-- ===== Traffic + DNS — canvases created lazily by RaxCharts (pages/dashboard.js) ===== -->
+      <div class="grid grid-4 mb-6" id="dns">
+        <div class="card span-3">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="line-chart" aria-hidden="true"></i><span class="card-title">Traffic Graph — Last 24h</span></div>
+            <span class="pill pill-ok"><span class="pill-dot"></span>Live</span>
+          </div>
+          <div class="chart-mount h-chart-lg"><canvas id="trafficChart"></canvas></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="pie-chart" aria-hidden="true"></i><span class="card-title">DNS Statistics</span></div>
+          </div>
+          <div class="chart-mount h-chart-sm"><canvas id="dnsChart"></canvas></div>
+          <div class="metric-label mt-3 text-center">9,200 queries today · AdGuard Home</div>
+        </div>
+      </div>
+
+      <!-- ===== Security engines ===== -->
+      <div class="grid grid-4 mb-6" id="crowdsec">
+        <div class="card card-glow-green">
+          <div class="card-head">
+            <span class="card-title">CrowdSec</span>
+            <span class="pill pill-ok"><span class="pill-dot"></span>Enrolled</span>
+          </div>
+          <div class="metric-value">58</div>
+          <div class="metric-label">community decisions applied</div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">Suricata IDS</span>
+            <span class="pill pill-warn"><span class="pill-dot"></span>3 new alerts</span>
+          </div>
+          <div class="metric-value">1,204</div>
+          <div class="metric-label">signatures loaded · IPS mode</div>
+        </div>
+
+        <div class="card card-glow-cyan">
+          <div class="card-head">
+            <span class="card-title">Threat Counter</span>
+            <span class="pill pill-danger"><span class="pill-dot"></span>Today</span>
+          </div>
+          <div class="metric-value">27</div>
+          <div class="metric-label">threats detected &amp; mitigated</div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">Blocked IPs</span>
+            <span class="pill pill-ok"><span class="pill-dot"></span>Active bans</span>
+          </div>
+          <div class="metric-value">312</div>
+          <div class="metric-label">on the deny list this week</div>
+        </div>
+      </div>
+
+      <!-- ===== Sessions + Top clients ===== -->
+      <div class="grid grid-4 mb-6">
+        <div class="card span-2">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="bar-chart-3" aria-hidden="true"></i><span class="card-title">Sessions by VLAN</span></div>
+            <span class="metric-label">647 active</span>
+          </div>
+          <div class="chart-mount h-chart-md"><canvas id="sessionsChart"></canvas></div>
+        </div>
+
+        <div class="card span-2">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="users" aria-hidden="true"></i><span class="card-title">Top Clients</span></div>
+          </div>
+          <div class="table-wrap card-scroll" id="topClientsTable">
+            <table class="data-table">
+              <thead><tr><th>Device</th><th>IP</th><th>VLAN</th><th>Usage</th></tr></thead>
+              <tbody>
+                <tr><td>rax-workstation</td><td class="mono ip">10.10.20.14</td><td>Home</td><td class="mono">18.4 GB</td></tr>
+                <tr><td>nvr-cctv-01</td><td class="mono ip">10.10.50.5</td><td>CCTV</td><td class="mono">11.2 GB</td></tr>
+                <tr><td>netpulse-svc</td><td class="mono ip">10.10.40.2</td><td>Server</td><td class="mono">7.9 GB</td></tr>
+                <tr><td>galaxy-s24</td><td class="mono ip">10.10.20.31</td><td>Home</td><td class="mono">4.1 GB</td></tr>
+                <tr><td>iot-hub-bridge</td><td class="mono ip">10.10.30.8</td><td>IoT</td><td class="mono">2.6 GB</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Network map + Threat feed ===== -->
+      <div class="grid grid-4 mb-6" id="network-map">
+        <div class="card span-2">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="globe" aria-hidden="true"></i><span class="card-title">Network Map</span></div>
+            <span class="pill pill-ok"><span class="pill-dot"></span>All segments healthy</span>
+          </div>
+          <div class="relative h-chart-xl">
+            <svg class="netmap-svg" width="100%" height="100%" viewBox="0 0 400 260" aria-hidden="true">
+              <line class="netmap-line flow" x1="200" y1="40" x2="200" y2="120"></line>
+              <line class="netmap-line flow" x1="200" y1="120" x2="80" y2="200"></line>
+              <line class="netmap-line flow" x1="200" y1="120" x2="160" y2="220"></line>
+              <line class="netmap-line flow" x1="200" y1="120" x2="240" y2="220"></line>
+              <line class="netmap-line flow" x1="200" y1="120" x2="320" y2="200"></line>
+            </svg>
+            <div class="netmap-node" style="left:50%;top:15%;">
+              <div class="dot" style="background:var(--cyan-500);box-shadow:0 0 10px var(--accent-glow);"></div>
+              <div class="label">WAN Gateway</div>
+            </div>
+            <div class="netmap-node" style="left:50%;top:46%;">
+              <div class="dot" style="background:var(--green-500);box-shadow:0 0 10px var(--status-ok-glow);"></div>
+              <div class="label">OPNsense Core</div>
+            </div>
+            <div class="netmap-node" style="left:20%;top:77%;">
+              <div class="dot" style="background:var(--cyan-500);"></div>
+              <div class="label">Home / IoT</div>
+            </div>
+            <div class="netmap-node" style="left:40%;top:85%;">
+              <div class="dot" style="background:var(--cyan-500);"></div>
+              <div class="label">CCTV VLAN</div>
+            </div>
+            <div class="netmap-node" style="left:60%;top:85%;">
+              <div class="dot" style="background:var(--cyan-500);"></div>
+              <div class="label">Server VLAN</div>
+            </div>
+            <div class="netmap-node" style="left:80%;top:77%;">
+              <div class="dot" style="background:var(--status-warn);"></div>
+              <div class="label">Guest VLAN</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card span-2">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="siren" aria-hidden="true"></i><span class="card-title">Live Threat Feed</span></div>
+          </div>
+          <div class="card-scroll">
+            <div class="feed-item">
+              <div class="feed-icon danger"><i data-lucide="shield-x" aria-hidden="true"></i></div>
+              <div>
+                <div class="feed-text">Suricata blocked outbound connection to <span class="mono">103.219.xxx.xxx</span> (HK)</div>
+                <div class="feed-meta">2 min ago · Server VLAN</div>
+              </div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-icon warn"><i data-lucide="alert-triangle" aria-hidden="true"></i></div>
+              <div>
+                <div class="feed-text">CrowdSec flagged repeated SSH auth failures</div>
+                <div class="feed-meta">14 min ago · WAN</div>
+              </div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-icon ok"><i data-lucide="check-circle" aria-hidden="true"></i></div>
+              <div>
+                <div class="feed-text">AdGuard blocklists updated successfully</div>
+                <div class="feed-meta">31 min ago · DNS</div>
+              </div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-icon danger"><i data-lucide="shield-x" aria-hidden="true"></i></div>
+              <div>
+                <div class="feed-text">Port scan detected and dropped</div>
+                <div class="feed-meta">48 min ago · Guest VLAN</div>
+              </div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-icon warn"><i data-lucide="alert-triangle" aria-hidden="true"></i></div>
+              <div>
+                <div class="feed-text">New device joined IoT VLAN — unrecognized MAC</div>
+                <div class="feed-meta">1 hr ago · IoT</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Gateway health — bar-fill driven by --fill custom property, not raw inline width ===== -->
+      <div class="grid grid-4">
+        <div class="card span-4">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="signal" aria-hidden="true"></i><span class="card-title">Gateway Health</span></div>
+            <span class="metric-label">Checked every 5s</span>
+          </div>
+          <div class="grid grid-3">
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="text-secondary text-xs">WAN_PPPOE — packet loss</span>
+                <span class="mono text-ok text-sm">0.0%</span>
+              </div>
+              <div class="bar-track"><div class="bar-fill" style="--fill:2;"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="text-secondary text-xs">Tailscale exit node — latency</span>
+                <span class="mono text-ok text-sm">38 ms</span>
+              </div>
+              <div class="bar-track"><div class="bar-fill" style="--fill:28;"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="text-secondary text-xs">DNS resolver — response time</span>
+                <span class="mono text-warn text-sm">64 ms</span>
+              </div>
+              <div class="bar-track"><div class="bar-fill warn" style="--fill:52;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast-stack-mount" class="toast-stack" aria-live="polite"></div>
+<div id="modal-host-mount"></div>
+
+<script src="assets/js/events.js"></script>
+<script src="assets/js/registry.js"></script>
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/components/sidebar.js"></script>
+<script src="assets/js/components/topbar.js"></script>
+<script src="assets/js/components/card.js"></script>
+<script src="assets/js/components/widget.js"></script>
+<script src="assets/js/components/modal.js"></script>
+<script src="assets/js/components/table.js"></script>
+<script src="assets/js/components/tabs.js"></script>
+<script src="assets/js/components/toast.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/notifications.js"></script>
+<script src="assets/js/search.js"></script>
+<script src="assets/js/command-palette.js"></script>
+<script src="assets/js/navigation.js"></script>
+<script src="assets/js/menu-config.js"></script>
+<script src="assets/js/commands-config.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/pages/dashboard.js"></script>
+<script>
+  RaxNavigation.mount({ active: 'dashboard', title: 'Dashboard', crumb: '/ Overview', search: 'Search devices, IPs…' });
+  RaxCore.boot();
+</script>
+</body>
+</html>

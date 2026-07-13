@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="RAX Theme — VPN & Tailscale: peers, exit-node routes, throughput, and connection history.">
+<title>RAX Theme — VPN &amp; Tailscale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="stylesheet" href="assets/css/variables.css">
+<link rel="stylesheet" href="assets/css/theme.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/layout.css">
+<link rel="stylesheet" href="assets/css/utilities.css">
+<link rel="stylesheet" href="assets/css/animations.css">
+<link rel="stylesheet" href="assets/css/components/card.css">
+<link rel="stylesheet" href="assets/css/components/badge.css">
+<link rel="stylesheet" href="assets/css/components/button.css">
+<link rel="stylesheet" href="assets/css/components/table.css">
+<link rel="stylesheet" href="assets/css/components/form.css">
+<link rel="stylesheet" href="assets/css/components/sidebar.css">
+<link rel="stylesheet" href="assets/css/components/topbar.css">
+<link rel="stylesheet" href="assets/css/components/charts.css">
+<link rel="stylesheet" href="assets/css/components/toast.css">
+<link rel="stylesheet" href="assets/css/components/modal.css">
+<link rel="stylesheet" href="assets/css/components/command-palette.css">
+<script>
+  (function () {
+    try {
+      var p = JSON.parse(localStorage.getItem('rax-theme')) || {};
+      document.documentElement.setAttribute('data-mode', p.mode || 'dark');
+      document.documentElement.setAttribute('data-accent', p.accent || 'cyan');
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<div class="bg-grid"></div>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar-mount"></aside>
+
+  <div>
+    <header class="topbar" id="topbar-mount"></header>
+
+    <main class="page" id="main-content">
+
+      <!-- ===== Summary strip — rendered by RaxComponents.Card via pages/vpn.js (Phase D) ===== -->
+      <div class="grid grid-4 mb-6">
+        <div id="card-tailnet"></div>
+        <div id="card-exit"></div>
+        <div id="card-peers"></div>
+        <div id="card-keyexpiry"></div>
+      </div>
+
+      <!-- ===== Peers table + throughput ===== -->
+      <div class="grid grid-4 mb-6">
+        <div class="card span-3">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="users" aria-hidden="true"></i><span class="card-title">Tailnet Peers</span></div>
+            <button class="btn btn-ghost"><i data-lucide="user-plus" aria-hidden="true"></i>Invite device</button>
+          </div>
+          <div class="table-wrap" id="peersTable">
+            <table class="data-table">
+              <thead><tr><th>Device</th><th>Tailscale IP</th><th>OS</th><th>Connection</th><th>Last seen</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>opnsense-gw <span class="text-tertiary">(this node)</span></td><td class="mono ip">100.64.0.1</td><td>FreeBSD</td><td><span class="pill pill-info">Exit node</span></td><td class="mono">now</td><td><span class="pill pill-ok">Online</span></td></tr>
+                <tr><td>rax-workstation</td><td class="mono ip">100.64.0.4</td><td>Linux</td><td><span class="pill pill-ok">Direct</span></td><td class="mono">now</td><td><span class="pill pill-ok">Online</span></td></tr>
+                <tr><td>galaxy-s24</td><td class="mono ip">100.64.0.7</td><td>Android</td><td><span class="pill pill-ok">Direct</span></td><td class="mono">2 min ago</td><td><span class="pill pill-ok">Online</span></td></tr>
+                <tr><td>macbook-amr</td><td class="mono ip">100.64.0.9</td><td>macOS</td><td><span class="pill pill-warn">Relayed (DERP)</span></td><td class="mono">6 min ago</td><td><span class="pill pill-ok">Online</span></td></tr>
+                <tr><td>netpulse-svc</td><td class="mono ip">100.64.0.11</td><td>Linux</td><td><span class="pill pill-ok">Direct</span></td><td class="mono">now</td><td><span class="pill pill-ok">Online</span></td></tr>
+                <tr><td>travel-laptop</td><td class="mono ip">100.64.0.14</td><td>Windows</td><td>—</td><td class="mono">3 days ago</td><td><span class="pill pill-danger">Offline</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="activity" aria-hidden="true"></i><span class="card-title">Tunnel Throughput</span></div>
+          </div>
+          <div class="chart-mount h-chart-sm"><canvas id="vpnChart"></canvas></div>
+          <div class="metric-label mt-3 text-center">last 60 minutes · Mbps</div>
+        </div>
+      </div>
+
+      <!-- ===== Exit node routing + Timeline ===== -->
+      <div class="grid grid-4">
+        <div class="card span-2">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="route" aria-hidden="true"></i><span class="card-title">Subnet Routes Advertised</span></div>
+            <span class="metric-label">RFC1918 ranges via opnsense-gw</span>
+          </div>
+
+          <div class="flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-semibold">10.10.10.0/24</div>
+                <div class="metric-label mt-2">Management VLAN</div>
+              </div>
+              <label class="switch"><input type="checkbox" checked aria-label="Advertise Management VLAN route"><span class="track"></span></label>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-semibold">10.10.20.0/24</div>
+                <div class="metric-label mt-2">Home VLAN</div>
+              </div>
+              <label class="switch"><input type="checkbox" checked aria-label="Advertise Home VLAN route"><span class="track"></span></label>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-semibold">10.10.40.0/24</div>
+                <div class="metric-label mt-2">Server VLAN</div>
+              </div>
+              <label class="switch"><input type="checkbox" checked aria-label="Advertise Server VLAN route"><span class="track"></span></label>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-semibold">10.10.30.0/24</div>
+                <div class="metric-label mt-2">IoT VLAN — not advertised</div>
+              </div>
+              <label class="switch"><input type="checkbox" aria-label="Advertise IoT VLAN route"><span class="track"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card span-2">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="history" aria-hidden="true"></i><span class="card-title">Recent Connection Events</span></div>
+          </div>
+          <div class="card-scroll">
+            <div class="timeline-item">
+              <div class="timeline-dot" style="background:var(--status-ok);box-shadow:0 0 6px var(--status-ok-glow);"></div>
+              <div>
+                <div class="feed-text">galaxy-s24 reconnected via direct path</div>
+                <div class="feed-meta">2 min ago</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot" style="background:var(--status-warn);"></div>
+              <div>
+                <div class="feed-text">macbook-amr fell back to DERP relay (NAT traversal failed)</div>
+                <div class="feed-meta">6 min ago</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot" style="background:var(--cyan-500);"></div>
+              <div>
+                <div class="feed-text">Exit node route table refreshed — 3 subnets active</div>
+                <div class="feed-meta">41 min ago</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot" style="background:var(--status-danger);"></div>
+              <div>
+                <div class="feed-text">travel-laptop went offline</div>
+                <div class="feed-meta">3 days ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast-stack-mount" class="toast-stack" aria-live="polite"></div>
+<div id="modal-host-mount"></div>
+
+<script src="assets/js/events.js"></script>
+<script src="assets/js/registry.js"></script>
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/components/sidebar.js"></script>
+<script src="assets/js/components/topbar.js"></script>
+<script src="assets/js/components/card.js"></script>
+<script src="assets/js/components/widget.js"></script>
+<script src="assets/js/components/modal.js"></script>
+<script src="assets/js/components/table.js"></script>
+<script src="assets/js/components/tabs.js"></script>
+<script src="assets/js/components/toast.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/notifications.js"></script>
+<script src="assets/js/search.js"></script>
+<script src="assets/js/command-palette.js"></script>
+<script src="assets/js/navigation.js"></script>
+<script src="assets/js/menu-config.js"></script>
+<script src="assets/js/commands-config.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/pages/vpn.js"></script>
+<script>
+  RaxNavigation.mount({ active: 'vpn', title: 'VPN & Tailscale', crumb: '/ Network / VPN', search: 'Search peers, IPs…' });
+  RaxCore.boot();
+</script>
+</body>
+</html>

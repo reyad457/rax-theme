@@ -1,0 +1,92 @@
+/**
+ * animations.css — ANIMATION LIBRARY
+ * ------------------------------------------------------------------
+ * Purpose:      One named, reusable set of motion utilities. No
+ *               component is allowed to define its own @keyframes.
+ * Responsibility: fade / slide / pulse / glow / skeleton-loading /
+ *               page-transition / hover-lift.
+ * Dependencies: variables.css (--duration-*, --ease-*)
+ * Extension:    Add a new named animation here, following the
+ *               transform/opacity-only rule below, then reference it
+ *               by class name from a component file.
+ * ------------------------------------------------------------------
+ * PERFORMANCE RULE: every keyframe below animates only `transform`
+ * and/or `opacity` — both are compositor-only properties that never
+ * trigger layout or paint. Do not add a keyframe that animates
+ * width/height/top/left/box-shadow directly (Phase B §7).
+ *
+ * prefers-reduced-motion is handled once in variables.css by zeroing
+ * the duration tokens these animations consume — nothing here needs
+ * its own reduced-motion override.
+ */
+
+@keyframes rax-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.anim-fade-in {
+  animation: rax-fade-in var(--duration-base) var(--ease-decelerate) both;
+}
+
+@keyframes rax-slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.anim-slide-up {
+  animation: rax-slide-up var(--duration-base) var(--ease-decelerate) both;
+}
+
+/* Staggered card entrance — index via inline --i custom property (0,1,2..) */
+.anim-entrance {
+  animation: rax-slide-up var(--duration-base) var(--ease-decelerate) both;
+  animation-delay: calc(var(--i, 0) * 35ms);
+}
+
+@keyframes rax-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.anim-pulse {
+  animation: rax-pulse 1.6s var(--ease-standard) infinite;
+}
+
+@keyframes rax-glow {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); }
+  50% { filter: drop-shadow(0 0 6px var(--accent-glow)); }
+}
+.anim-glow {
+  animation: rax-glow 2.2s var(--ease-standard) infinite;
+}
+
+@keyframes rax-skeleton {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.anim-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--skeleton-base);
+}
+.anim-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--skeleton-shine), transparent);
+  animation: rax-skeleton 1.4s var(--ease-standard) infinite;
+}
+
+@keyframes rax-page-transition {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.anim-page-transition {
+  animation: rax-page-transition var(--duration-slow) var(--ease-decelerate) both;
+}
+
+.anim-hover-lift {
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.anim-hover-lift:hover {
+  transform: translateY(-2px);
+}

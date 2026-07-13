@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="RAX Theme — Suricata IDS/IPS: severity breakdown, top triggered rules, and the live alert log.">
+<title>RAX Theme — Suricata IDS/IPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="stylesheet" href="assets/css/variables.css">
+<link rel="stylesheet" href="assets/css/theme.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/layout.css">
+<link rel="stylesheet" href="assets/css/utilities.css">
+<link rel="stylesheet" href="assets/css/animations.css">
+<link rel="stylesheet" href="assets/css/components/card.css">
+<link rel="stylesheet" href="assets/css/components/badge.css">
+<link rel="stylesheet" href="assets/css/components/button.css">
+<link rel="stylesheet" href="assets/css/components/table.css">
+<link rel="stylesheet" href="assets/css/components/form.css">
+<link rel="stylesheet" href="assets/css/components/sidebar.css">
+<link rel="stylesheet" href="assets/css/components/topbar.css">
+<link rel="stylesheet" href="assets/css/components/charts.css">
+<link rel="stylesheet" href="assets/css/components/toast.css">
+<link rel="stylesheet" href="assets/css/components/modal.css">
+<link rel="stylesheet" href="assets/css/components/command-palette.css">
+<script>
+  (function () {
+    try {
+      var p = JSON.parse(localStorage.getItem('rax-theme')) || {};
+      document.documentElement.setAttribute('data-mode', p.mode || 'dark');
+      document.documentElement.setAttribute('data-accent', p.accent || 'cyan');
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<div class="bg-grid"></div>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar-mount"></aside>
+
+  <div>
+    <header class="topbar" id="topbar-mount"></header>
+
+    <main class="page" id="main-content">
+
+      <!-- ===== Summary strip — Engine Mode stays static (custom toggle header, see
+           pages/suricata.js for why); other 3 rendered by RaxComponents.Card (Phase D) ===== -->
+      <div class="grid grid-4 mb-6">
+        <div class="card card-glow-cyan">
+          <div class="card-head">
+            <span class="card-title">Engine Mode</span>
+            <label class="switch"><input type="checkbox" checked aria-label="Toggle inline IPS mode"><span class="track"></span><span class="switch-label">IPS</span></label>
+          </div>
+          <div class="metric-value">Inline</div>
+          <div class="metric-label">blocking matched traffic, not just logging</div>
+        </div>
+
+        <div id="card-signatures"></div>
+        <div id="card-alerts-today"></div>
+        <div id="card-blocked-week"></div>
+      </div>
+
+      <!-- ===== Severity + category ===== -->
+      <div class="grid grid-4 mb-6">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="siren" aria-hidden="true"></i><span class="card-title">Severity Breakdown</span></div>
+          </div>
+          <div class="sev-row">
+            <span class="sev-label text-danger">Critical</span>
+            <div class="bar-track flex-1"><div class="bar-fill danger" style="--fill:11;"></div></div>
+            <span class="sev-count">3</span>
+          </div>
+          <div class="sev-row">
+            <span class="sev-label text-warn">High</span>
+            <div class="bar-track flex-1"><div class="bar-fill warn" style="--fill:33;"></div></div>
+            <span class="sev-count">9</span>
+          </div>
+          <div class="sev-row">
+            <span class="sev-label text-cyan">Medium</span>
+            <div class="bar-track flex-1"><div class="bar-fill" style="--fill:48;"></div></div>
+            <span class="sev-count">13</span>
+          </div>
+          <div class="sev-row">
+            <span class="sev-label text-secondary">Low</span>
+            <div class="bar-track flex-1"><div class="bar-fill" style="--fill:8;background:var(--text-tertiary);box-shadow:none;"></div></div>
+            <span class="sev-count">2</span>
+          </div>
+        </div>
+
+        <div class="card span-2">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="bar-chart-3" aria-hidden="true"></i><span class="card-title">Alerts by Category — 7 days</span></div>
+          </div>
+          <div class="chart-mount h-chart-lg"><canvas id="categoryChart"></canvas></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="list-ordered" aria-hidden="true"></i><span class="card-title">Top Triggered Rules</span></div>
+          </div>
+          <div class="flex-col gap-3">
+            <div class="flex justify-between text-sm">
+              <span class="text-secondary">ET SCAN Suspicious inbound</span><span class="mono text-tertiary">41</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-secondary">ET POLICY curl UA outbound</span><span class="mono text-tertiary">18</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-secondary">ET TOR known exit node</span><span class="mono text-tertiary">12</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-secondary">Local: IoT-to-WAN DNS block</span><span class="mono text-tertiary">9</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Alerts table ===== -->
+      <div class="card p-0">
+        <div class="table-card-head">
+          <div class="card-head">
+            <div class="card-title-row"><i data-lucide="scroll-text" aria-hidden="true"></i><span class="card-title">Recent Alerts</span></div>
+            <div class="flex gap-3">
+              <button class="btn btn-ghost"><i data-lucide="filter" aria-hidden="true"></i>Severity: All</button>
+              <button class="btn btn-primary"><i data-lucide="download" aria-hidden="true"></i>Export</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap" id="alertsTable">
+          <table class="data-table">
+            <thead><tr><th>Time</th><th>Severity</th><th>Signature</th><th>Category</th><th>Source</th><th>Destination</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">14:22:03</td><td><span class="pill pill-danger">Critical</span></td><td>ET MALWARE C2 beacon detected</td><td>Malware</td><td class="mono ip">103.219.44.7</td><td class="mono ip">10.10.40.2:443</td><td><span class="pill pill-danger">Dropped</span></td></tr>
+              <tr><td class="mono">13:58:41</td><td><span class="pill pill-warn">High</span></td><td>ET SCAN Nmap SYN scan</td><td>Recon</td><td class="mono ip">45.134.26.91</td><td class="mono ip">10.10.10.1</td><td><span class="pill pill-danger">Dropped</span></td></tr>
+              <tr><td class="mono">13:40:12</td><td><span class="pill pill-info">Medium</span></td><td>ET POLICY curl User-Agent outbound</td><td>Policy</td><td class="mono ip">10.10.40.2</td><td class="mono ip">185.199.108.133</td><td><span class="pill pill-ok">Logged</span></td></tr>
+              <tr><td class="mono">12:55:03</td><td><span class="pill pill-warn">High</span></td><td>ET TOR Known Tor Exit Node traffic</td><td>Anonymization</td><td class="mono ip">10.10.20.14</td><td class="mono ip">199.87.154.255</td><td><span class="pill pill-danger">Dropped</span></td></tr>
+              <tr><td class="mono">11:10:47</td><td><span class="pill pill-info">Medium</span></td><td>Local: IoT device queried external DNS directly</td><td>Local rule</td><td class="mono ip">10.10.30.8</td><td class="mono ip">8.8.8.8:53</td><td><span class="pill pill-danger">Dropped</span></td></tr>
+              <tr><td class="mono">09:44:29</td><td><span class="pill" style="background:rgba(90,101,119,0.18);color:var(--text-secondary);">Low</span></td><td>ET INFO TLS handshake with expired cert</td><td>Info</td><td class="mono ip">10.10.50.5</td><td class="mono ip">203.0.113.44:443</td><td><span class="pill pill-ok">Logged</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast-stack-mount" class="toast-stack" aria-live="polite"></div>
+<div id="modal-host-mount"></div>
+
+<script src="assets/js/events.js"></script>
+<script src="assets/js/registry.js"></script>
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/components/sidebar.js"></script>
+<script src="assets/js/components/topbar.js"></script>
+<script src="assets/js/components/card.js"></script>
+<script src="assets/js/components/widget.js"></script>
+<script src="assets/js/components/modal.js"></script>
+<script src="assets/js/components/table.js"></script>
+<script src="assets/js/components/tabs.js"></script>
+<script src="assets/js/components/toast.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/notifications.js"></script>
+<script src="assets/js/search.js"></script>
+<script src="assets/js/command-palette.js"></script>
+<script src="assets/js/navigation.js"></script>
+<script src="assets/js/menu-config.js"></script>
+<script src="assets/js/commands-config.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/pages/suricata.js"></script>
+<script>
+  RaxNavigation.mount({ active: 'suricata', title: 'Suricata IDS/IPS', crumb: '/ Protection / Suricata', search: 'Search signatures, IPs…' });
+  RaxCore.boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+/**
+ * variables.css — Tier 1: PRIMITIVE TOKENS
+ * ------------------------------------------------------------------
+ * Purpose:      The raw vocabulary of the design system. Every value
+ *               anyone could ever want lives here, with zero semantic
+ *               meaning attached to the name.
+ * Responsibility: Define scales (color, spacing, radius, shadow,
+ *               motion, z-index, type). Never assign a role.
+ * Public API:   --gray-*, --cyan-*, --green-*, --amber-*, --red-*,
+ *               --space-*, --radius-*, --shadow-*, --duration-*,
+ *               --ease-*, --z-*, --font-*, --text-*-size
+ * Dependencies: none — this is the base of the token pyramid.
+ * Extension:    Add new primitives here. Never reference a primitive
+ *               from another primitive's definition except to widen
+ *               a scale (e.g. adding --gray-975).
+ * ------------------------------------------------------------------
+ * Rule for every other CSS file in this project: a component or
+ * layout rule may reference Tier 2/3 tokens (theme.css, component
+ * files) but must NEVER reference a Tier 1 primitive below directly.
+ * If a raw value seems needed, that's a signal a Tier 2 token is
+ * missing — add it in theme.css, don't reach down a layer.
+ */
+
+:root {
+  /* ---- Color primitives ------------------------------------------------ */
+  /* Neutral scale — anchored to the original VARYX background/card values */
+  --gray-1000: #050608;
+  --gray-975:  #090B10;   /* original --bg-base */
+  --gray-950:  #0C0F15;
+  --gray-925:  #11161D;   /* original --bg-card */
+  --gray-900:  #161C25;
+  --gray-800:  #1D2530;
+  --gray-700:  #2A3340;
+  --gray-600:  #3A4453;
+  --gray-500:  #5A6577;   /* original chart tick/axis color */
+  --gray-400:  #7C8798;
+  --gray-300:  #A3ACBA;
+  --gray-200:  #C7CEDA;
+  --gray-100:  #E6E9EF;
+  --gray-50:   #F4F6F9;
+
+  /* Cyan accent scale */
+  --cyan-700: #007A94;
+  --cyan-600: #00A7C7;
+  --cyan-500: #00D9FF;   /* original --accent-cyan */
+  --cyan-400: #4FE3FF;
+  --cyan-300: #93EEFF;
+
+  /* Green accent scale */
+  --green-700: #00A66E;
+  --green-600: #00D488;
+  --green-500: #00FF9D;  /* original --accent-green */
+  --green-400: #5DFFC0;
+  --green-300: #A3FFDD;
+
+  /* Purple accent scale (theme option) */
+  --purple-700: #6D28D9;
+  --purple-600: #8B5CF6;
+  --purple-500: #A78BFA;
+  --purple-400: #C4B5FD;
+  --purple-300: #DDD6FE;
+
+  /* Red accent scale (theme option + danger status) */
+  --red-700: #B0233F;
+  --red-600: #E12A4E;
+  --red-500: #FF3B5C;   /* original danger */
+  --red-400: #FF6E88;
+  --red-300: #FFA3B4;
+
+  /* Orange accent scale (theme option) */
+  --orange-700: #B4560A;
+  --orange-600: #E67E12;
+  --orange-500: #FF9A32;
+  --orange-400: #FFB566;
+  --orange-300: #FFD3A3;
+
+  /* Amber (status: warn) */
+  --amber-600: #D9A02E;
+  --amber-500: #FFC857;  /* original warning */
+  --amber-400: #FFDA8C;
+
+  /* ---- Spacing scale (4px base unit) ----------------------------------- */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 14px;
+  --space-5: 16px;
+  --space-6: 18px;
+  --space-7: 20px;
+  --space-8: 24px;
+  --space-9: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ---- Radius scale ------------------------------------------------- */
+  --radius-sm: 8px;    /* buttons */
+  --radius-md: 12px;   /* inputs */
+  --radius-lg: 16px;   /* cards */
+  --radius-xl: 20px;   /* modals / large surfaces */
+  --radius-full: 999px; /* pills, chips, switches */
+
+  /* ---- Elevation / shadow scale --------------------------------------- */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-inset-hairline: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+
+  /* ---- Motion primitives ------------------------------------------------ */
+  --duration-instant: 60ms;
+  --duration-fast: 140ms;
+  --duration-base: 220ms;
+  --duration-slow: 380ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+
+  /* ---- Typography primitives ------------------------------------------- */
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --text-2xs: 10px;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 26px;
+
+  /* ---- Z-index scale ------------------------------------------------- */
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-sidebar: 20;
+  --z-topbar: 30;
+  --z-dropdown: 40;
+  --z-toast: 50;
+  --z-modal-backdrop: 60;
+  --z-modal: 61;
+  --z-command-palette: 70;
+}
+
+/* prefers-reduced-motion is resolved once, globally, here at the primitive
+   layer by collapsing the motion scale — every component that uses
+   var(--duration-*)/var(--ease-*) inherits the reduction automatically,
+   with zero per-component special-casing required. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0ms;
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
+}
