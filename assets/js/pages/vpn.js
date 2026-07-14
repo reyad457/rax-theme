@@ -57,7 +57,7 @@
           y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { callback: function (v) { return v + ' Mb'; }, font: { size: 10 } } },
         },
       },
-    });
+    }, { seriesVars: ['--chart-series-1'], fillAlpha: 0.12 });
   }
 
   /** Searches the peers table's own existing rows — no fabricated

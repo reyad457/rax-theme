@@ -87,7 +87,7 @@
             y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { callback: function (v) { return v + ' Mb'; }, font: { size: 10 } } },
           },
         },
-      });
+      }, { seriesVars: ['--chart-series-1', '--chart-series-2'], fillAlpha: 0.12 });
     }
 
     var dns = document.getElementById('dnsChart');
@@ -102,7 +102,7 @@
           responsive: true, maintainAspectRatio: false, cutout: '68%',
           plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 10 } } } },
         },
-      });
+      }, { barColorVars: ['--chart-series-1', '--status-danger', '--status-ok'] });
     }
 
     var sessions = document.getElementById('sessionsChart');
@@ -125,7 +125,7 @@
             y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { font: { size: 10 } } },
           },
         },
-      });
+      }, { barColorVars: ['--chart-series-1', '--status-ok', '--status-warn', '--chart-series-1', '--status-ok', '--gray-500'] });
     }
   }
 

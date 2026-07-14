@@ -177,6 +177,7 @@
 <script src="assets/js/registry.js"></script>
 <script src="assets/js/utils.js"></script>
 <script src="assets/js/theme.js"></script>
+<script src="assets/js/plugin-loader.js"></script>
 <script src="assets/js/components/sidebar.js"></script>
 <script src="assets/js/components/topbar.js"></script>
 <script src="assets/js/components/card.js"></script>
@@ -196,7 +197,7 @@
 <script src="assets/js/pages/vpn.js"></script>
 <script>
   RaxNavigation.mount({ active: 'vpn', title: 'VPN & Tailscale', crumb: '/ Network / VPN', search: 'Search peers, IPs…' });
-  RaxCore.boot();
+  RaxPluginLoader.loadAll().then(function () { RaxCore.boot(); });
 </script>
 </body>
 </html>

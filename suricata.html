@@ -160,6 +160,7 @@
 <script src="assets/js/registry.js"></script>
 <script src="assets/js/utils.js"></script>
 <script src="assets/js/theme.js"></script>
+<script src="assets/js/plugin-loader.js"></script>
 <script src="assets/js/components/sidebar.js"></script>
 <script src="assets/js/components/topbar.js"></script>
 <script src="assets/js/components/card.js"></script>
@@ -179,7 +180,7 @@
 <script src="assets/js/pages/suricata.js"></script>
 <script>
   RaxNavigation.mount({ active: 'suricata', title: 'Suricata IDS/IPS', crumb: '/ Protection / Suricata', search: 'Search signatures, IPs…' });
-  RaxCore.boot();
+  RaxPluginLoader.loadAll().then(function () { RaxCore.boot(); });
 </script>
 </body>
 </html>

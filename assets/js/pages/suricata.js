@@ -64,7 +64,7 @@
           y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { font: { size: 10 } } },
         },
       },
-    });
+    }, { barColorVars: ['--status-danger', '--status-warn', '--chart-series-1', '--status-warn', '--status-ok', '--gray-500'] });
   }
 
   /** Searches the alerts table's own existing rows — no fabricated

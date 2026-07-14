@@ -62,8 +62,20 @@
     return getComputedStyle(el || document.documentElement).getPropertyValue(name).trim();
   }
 
+  /** Shared hex->rgba parser. Used by theme.js (glow colors) and
+   * charts.js (translucent chart fills derived from the current
+   * accent) so this parsing logic exists exactly once (Phase E). */
+  function hexToRgba(hex, alpha) {
+    var m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '');
+    var a = alpha != null ? alpha : 1;
+    if (!m) return 'rgba(0,217,255,' + a + ')';
+    var r = parseInt(m[1], 16), g = parseInt(m[2], 16), b = parseInt(m[3], 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+  }
+
   global.RaxUtils = {
     qs: qs, qsa: qsa, dom: dom, debounce: debounce,
     formatNumber: formatNumber, formatBytes: formatBytes, readCssVar: readCssVar,
+    hexToRgba: hexToRgba,
   };
 })(window);
