@@ -1,10 +1,13 @@
 # RAX Theme — Architecture (as of Phase E)
 
+*RAX Theme — Modern OPNsense-inspired Dashboard Framework*
+
 This document reflects what actually shipped, not the original plan — where
 Phase B's blueprint and reality diverged, this document explains why. For deep
 dives on specific subsystems, see the companion docs in this folder:
 `component-api.md`, `plugin-api.md`, `theming.md`, `events.md`,
-`api-classification.md`.
+`api-classification.md`, `project-structure.md` (file-by-file guide), and
+`architecture-diagram.md` (the same architecture as Mermaid diagrams).
 
 ---
 

@@ -1,91 +1,233 @@
+<div align="center">
+
 # RAX Theme
 
-A futuristic front-end skin for an OPNsense-style dashboard, built as a static HTML/CSS/JS
-prototype. Open `login.html` or `dashboard.html` directly in a browser — no build step needed.
+**Modern OPNsense-inspired Dashboard Framework**
 
-## What's here
+A production-quality, enterprise-grade Security Operations Center (SOC) theme and
+component framework for OPNsense — no build step, no bundler, no framework
+dependency.
+
+</div>
+
+---
+
+## Overview
+
+RAX Theme is a self-contained frontend framework for building OPNsense-style
+network dashboards. It ships with 5 complete console pages (Dashboard,
+Interfaces & VLANs, VPN & Tailscale, Suricata IDS/IPS, and Logs & Tables), a
+token-driven design system with 5 built-in accent themes plus dark/light mode,
+a small reusable component library, and a documented Extension API so other
+developers can add pages, widgets, commands, and search behavior without
+touching the framework's own source.
+
+The visual language is inspired by next-generation firewall and XDR
+interfaces — Palo Alto, Cisco Secure, Fortinet, CrowdStrike Falcon, Microsoft
+Defender XDR — deliberately **professional and minimal**, not a "movie
+hacker" theme.
+
+## Features
+
+- **5 built-in console pages** — Dashboard, Interfaces & VLANs, VPN & Tailscale,
+  Suricata IDS/IPS, Logs & Tables (firewall logs, DHCP leases, aliases, NAT rules)
+- **Zero build step** — plain HTML + classic `<script>` tags, runs from any
+  static file server (or `file://`) with no bundler, no `npm install`
+- **Token-driven design system** — a 3-tier CSS custom property architecture
+  (primitive → semantic → component) means every color, spacing value, radius,
+  shadow, and timing curve lives in exactly one place
+- **5 built-in accent themes** (cyan, emerald, purple, red, orange) + dark/light
+  mode, switchable at runtime with zero page reload, plus a plugin API for
+  registering additional named themes
+- **Reusable component library** — Card, Widget (ring gauges), Table (sortable),
+  Tabs, Modal, Toast, Sidebar, Topbar — each with a uniform `mount/update/destroy`
+  contract
+- **Command palette** (`Ctrl/Cmd+K`) and per-page search, both driven by the
+  same registry a plugin uses
+- **Documented Extension API** — register pages, menu items, widgets, commands,
+  search providers, and themes, without editing a single framework file
+- **Accessibility-first** — every icon labeled, every control keyboard-operable,
+  focus-trapped modals/palette, `prefers-reduced-motion` and `prefers-contrast`
+  both respected
+- **Chart.js integration isolated behind one module** (`RaxCharts`) — no page
+  or plugin ever calls `new Chart()` directly, and dataset colors follow the
+  active accent automatically
+
+## Screenshots
+
+> _Screenshots pending — add rendered captures of each of the 5 pages here
+> before the v1.0.0 tag. Suggested set:_
+> - `docs/screenshots/dashboard.png`
+> - `docs/screenshots/interfaces.png`
+> - `docs/screenshots/vpn.png`
+> - `docs/screenshots/suricata.png`
+> - `docs/screenshots/logs.png`
+> - `docs/screenshots/dark-vs-light.png` (mode comparison)
+> - `docs/screenshots/accents.png` (all 5 accent themes side by side)
+
+## Architecture overview
+
+RAX Theme is built as a set of small, single-responsibility JavaScript
+modules (no bundler — each attaches one global, e.g. `RaxRegistry`,
+`RaxTheme`, `RaxCharts`) plus a layered CSS token system. Full details,
+including a diagram, are in [`docs/architecture.md`](docs/architecture.md).
+
+```
+Design tokens (CSS)          Framework core (JS)             Components
+─────────────────────        ───────────────────────         ─────────────────
+variables.css (Tier 1)        RaxEvents    — pub/sub bus       Card, Widget,
+theme.css (Tier 2)             RaxRegistry — Extension API      Table, Tabs,
+layout / utilities /            RaxTheme    — accent/mode        Modal, Toast,
+animations / components/         RaxCharts   — Chart.js gateway   Sidebar, Topbar
+                                   RaxCore     — boot orchestrator
+                                    RaxPluginLoader — plugin loading
+```
+
+## Folder structure
 
 ```
 rax-theme/
-├── login.html           Animated sign-in screen (canvas particles + CSS grid)
-├── dashboard.html       Main SOC dashboard (all requested widgets)
-├── logs.html            Modern data tables: firewall logs, DHCP, aliases, NAT
-├── vpn.html             VPN & Tailscale: peers, exit-node routes, throughput, connection history
-├── interfaces.html      Interfaces & VLAN config: physical ports, per-VLAN cards, isolation matrix
-├── suricata.html        Dedicated Suricata alerts view: severity, categories, top rules, alert log
-├── css/
-│   ├── variables.css    Every color, radius, shadow, font, timing — one source of truth
-│   ├── base.css         Reset + global typography + reduced-motion handling
-│   ├── components.css   Sidebar, topbar, cards, gauges, tables, buttons, feed, VLAN cards, etc.
-│   └── login.css        Login-screen-only styles
-└── js/
-    ├── nav.js            Shared sidebar + topbar template — injected on every console page
-    ├── app.js            Live clock, sidebar collapse, button ripple, entrance animation
-    ├── particles.js      Canvas particle field for the login background
-    └── dashboard.js      Ring gauges + Chart.js graphs (traffic, DNS, sessions)
+├── README.md, LICENSE, CONTRIBUTING.md, CHANGELOG.md, ROADMAP.md,
+│   CODE_OF_CONDUCT.md, SECURITY.md
+├── .github/
+│   ├── ISSUE_TEMPLATE/            bug_report.md, feature_request.md
+│   ├── DISCUSSION_TEMPLATE/       ideas.md
+│   └── PULL_REQUEST_TEMPLATE.md
+├── docs/
+│   ├── architecture.md            system design, layered CSS, boot sequence
+│   ├── project-structure.md       annotated file-by-file folder guide
+│   ├── component-api.md           every RaxComponents.* contract
+│   ├── plugin-api.md              the Extension API + lifecycle
+│   ├── theming.md                 accent/mode system + registerTheme()
+│   ├── events.md                  the full framework event catalog
+│   └── api-classification.md      Public / Internal / Private, per export
+├── plugins/
+│   └── README.md                  plugin folder convention (no example plugin yet)
+├── dashboard.html, interfaces.html, vpn.html, suricata.html, logs.html
+└── assets/
+    ├── css/                       variables, theme, layout, utilities,
+    │                              animations, base, components/*.css
+    └── js/                        events, registry, theme, charts, core,
+                                    navigation, notifications, search,
+                                    command-palette, plugin-loader,
+                                    menu-config, commands-config,
+                                    components/*.js, pages/*.js
 ```
 
-### Shared navigation
+Full annotated version: [`docs/project-structure.md`](docs/project-structure.md).
 
-Every console page (all but `login.html`) has two empty mount points instead of duplicated markup:
+## Installation
+
+No build step, no package manager. Clone or download the repository and serve
+it with any static file server:
+
+```bash
+git clone https://github.com/<your-org>/rax-theme.git
+cd rax-theme
+python3 -m http.server 8080
+# then open http://localhost:8080/dashboard.html
+```
+
+Any static host works equally well (nginx, Caddy, GitHub Pages, or OPNsense's
+own web server once integrated as a theme).
+
+## Quick start
+
+Open [`dashboard.html`](dashboard.html) in a browser. From there:
+
+- Use the sidebar to visit the other 4 pages.
+- Press **`Ctrl/Cmd+K`** to open the command palette — try "Toggle Theme" or
+  "Cycle Accent Color."
+- Use the search box in the topbar on any page — it filters that page's real
+  content (tables, VLAN cards), not fake data.
+- Click a sortable table column header (Top Clients, Tailnet Peers, Recent
+  Alerts, and every table on the Logs page) to sort it.
+
+## Theme system
+
+Two independent axes — **mode** (`dark`/`light`) and **accent** (`cyan`/
+`emerald`/`purple`/`red`/`orange`) — resolved entirely through CSS custom
+properties on `<html data-mode="..." data-accent="...">`. Switching either
+takes effect instantly, with no reload, including live re-coloring of every
+Chart.js graph on the page.
+
+```js
+RaxTheme.setMode('light');
+RaxTheme.setAccent('emerald');
+RaxTheme.registerTheme('midnight-rose', { accent: '#FF2D78' }); // plugin-defined theme
+```
+
+Full guide, including the token architecture and the `registerTheme()`
+lifecycle contract: [`docs/theming.md`](docs/theming.md).
+
+## Plugin system
+
+A plugin is a plain script that registers itself through the public
+[Extension API](docs/plugin-api.md) — pages, menu items, commands, search
+providers, widgets, and themes — without ever editing a framework file:
+
+```js
+// plugins/my-plugin/index.js
+(function (global) {
+  'use strict';
+  global.RaxRegistry.registerPage({ id: 'my-plugin', title: 'My Plugin', init: init, destroy: function () {} });
+  global.RaxRegistry.registerMenuItem({ pageId: 'my-plugin', href: 'my-plugin.html', icon: 'puzzle', label: 'My Plugin', section: 'Plugins' });
+  function init() { /* ... */ }
+})(window);
+```
 
 ```html
-<aside class="sidebar" id="sidebar-mount"></aside>
-...
-<header class="topbar" id="topbar-mount"></header>
-...
-<script src="js/nav.js"></script>
-<script>RaxNav.mount({ active: 'vpn', title: 'VPN & Tailscale', crumb: '/ Network / VPN' });</script>
+<!-- in any page's <head>, before plugin-loader.js runs -->
+<script>window.RAX_PLUGINS = ['plugins/my-plugin/index.js'];</script>
 ```
 
-`js/nav.js` renders the full nav list once and marks the current page active — so adding a page or
-renaming a nav item is now a one-line change in `nav.js` instead of an edit across six files.
+`RaxPluginLoader` loads every declared plugin before `RaxCore.boot()` runs, so
+registrations are always in place before the sidebar renders and the active
+page module boots. Full reference, including the complete lifecycle diagram:
+[`docs/plugin-api.md`](docs/plugin-api.md).
 
-## Design tokens (from the brief)
+## Component system
 
-| Token | Value |
-|---|---|
-| Background | `#090B10` |
-| Card | `#11161D` |
-| Accent (cyan) | `#00D9FF` |
-| Accent (green) | `#00FF9D` |
-| Warning | `#FFC857` |
-| Danger | `#FF3B5C` |
-| Radius | `16px` cards, `12px` inputs, `8px` buttons |
-| Fonts | Inter (UI), JetBrains Mono (IPs, logs, stats) |
+Every reusable UI piece follows one contract:
 
-Everything reads from `css/variables.css`, so a palette or radius change is a one-file edit.
+```js
+var instance = RaxComponents.Card.mount(el, props);
+RaxComponents.Card.update(instance, newProps);
+RaxComponents.Card.destroy(instance);
+```
 
-## Wiring this to real OPNsense data
+Available components: `Card`, `Widget` (ring gauges), `Table` (sortable
+enhancement), `Tabs`, `Modal`, `Toast`. `Sidebar`/`Topbar` are framework-owned
+singletons — see [`docs/component-api.md`](docs/component-api.md) for every
+component's exact `props` shape and which ones are safe for a plugin to mount
+directly.
 
-This prototype uses mock numbers so it renders standalone. To make it live without touching
-any OPNsense PHP:
+## Browser support
 
-1. **Keep the OPNsense backend untouched.** This is a presentation layer only — it doesn't
-   replace `/usr/local/www`, it's a separate app that talks to OPNsense over its existing API.
-2. Point it at the **OPNsense REST API** (Firewall → Settings → API accounts, or `os-api` module)
-   for firewall status, interfaces, gateway health, and DHCP leases.
-3. Pull **Suricata** and **CrowdSec** stats either from their own APIs/log files, or — since you're
-   already planning NetPulse — have a small Flask service poll OPNsense/Suricata/CrowdSec/AdGuard
-   Home and expose one clean JSON endpoint each widget below can call:
-   - `/api/status` → the 4 summary cards
-   - `/api/vitals` → CPU / RAM / disk / temp gauges
-   - `/api/traffic?range=24h` → the traffic graph
-   - `/api/dns` → the DNS donut
-   - `/api/threats` → threat feed + blocked-IP count
-   - `/api/sessions` → sessions-by-VLAN bar chart
-4. In `js/dashboard.js`, swap the mock arrays (`down`, `up`, the doughnut `data`, etc.) for
-   `fetch()` calls to those endpoints, then re-run the same Chart.js/gauge code — the rendering
-   logic doesn't need to change, just the data source.
-5. For the tables in `logs.html`, replace the hard-coded `<tr>` rows with rows rendered from
-   the firewall log / lease / alias / NAT API responses — the CSS classes (`pill-ok`,
-   `pill-danger`, `.mono`, `.ip`) already encode the right styling per value.
+Built on modern, broadly-supported web platform features:
 
-## Notes
+- CSS custom properties, CSS Grid, `color-mix()` (Chrome/Edge 111+, Firefox
+  113+, Safari 16.2+)
+- `IntersectionObserver` (used for lazy chart loading — degrades gracefully to
+  eager loading if unavailable)
+- ES6+ JavaScript (`Promise`, arrow-free but `const`/`let`-free by convention —
+  written in ES5-compatible function syntax throughout for maximum
+  compatibility without a transpiler)
 
-- All charts use Chart.js (loaded from cdnjs) and Lucide icons (loaded from unpkg) — both free, no
-  API keys.
-- Respects `prefers-reduced-motion`.
-- Sidebar collapse, clock, ripple, and card entrance animation are all vanilla JS in `app.js` —
-  no framework dependency, so it's easy to drop into whatever templating OPNsense's `legacy` or
-  custom theme system ends up using.
+No IE11 support. No polyfills are bundled — if you need to support an older
+browser, `color-mix()` is the most likely feature to require a fallback.
+
+## Roadmap
+
+See [`ROADMAP.md`](ROADMAP.md) for the full phase-by-phase history and
+what's planned next (example plugin, dashboard widget customization, CI,
+visual regression testing).
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, coding conventions, and
+the PR process. Please also read [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+
+## License
+
+MIT — see [`LICENSE`](LICENSE).
