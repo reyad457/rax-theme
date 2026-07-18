@@ -96,10 +96,8 @@ RaxRegistry.registerMenuItem({
 
 Registers a dashboard widget for a named mount point. `RaxRegistry.getWidgets(mountPoint)`
 returns everything registered for that point — a future dashboard-customization
-feature (Phase B roadmap, not yet built) reads from here. No built-in page
-calls `getWidgets()` yet (Phase D explicitly deferred this — "do not begin
-plugin development" applied to Phase D too), so this is a forward-declared
-extension point, documented so it's ready when that feature ships.
+feature (see `ROADMAP.md`, not yet built) reads from here. No built-in page
+calls `getWidgets()` yet, so this is a forward-declared extension point, documented so it's ready when that feature ships.
 
 ```js
 RaxRegistry.registerWidget({

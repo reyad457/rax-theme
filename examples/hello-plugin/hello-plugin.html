@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="RAX Theme — Hello Plugin: a minimal, runnable example of the Extension API.">
+<title>RAX Theme — Hello Plugin (example)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://unpkg.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="../../assets/css/variables.css">
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/layout.css">
+<link rel="stylesheet" href="../../assets/css/utilities.css">
+<link rel="stylesheet" href="../../assets/css/animations.css">
+<link rel="stylesheet" href="../../assets/css/components/card.css">
+<link rel="stylesheet" href="../../assets/css/components/badge.css">
+<link rel="stylesheet" href="../../assets/css/components/button.css">
+<link rel="stylesheet" href="../../assets/css/components/sidebar.css">
+<link rel="stylesheet" href="../../assets/css/components/topbar.css">
+<link rel="stylesheet" href="../../assets/css/components/toast.css">
+<link rel="stylesheet" href="../../assets/css/components/modal.css">
+<link rel="stylesheet" href="../../assets/css/components/command-palette.css">
+<script>
+  (function () {
+    try {
+      var p = JSON.parse(localStorage.getItem('rax-theme')) || {};
+      document.documentElement.setAttribute('data-mode', p.mode || 'dark');
+      document.documentElement.setAttribute('data-accent', p.accent || 'cyan');
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<div class="bg-grid"></div>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar-mount"></aside>
+
+  <div>
+    <header class="topbar" id="topbar-mount"></header>
+
+    <main class="page" id="main-content">
+
+      <div class="card mb-6">
+        <div class="card-head">
+          <div class="card-title-row"><i data-lucide="puzzle" aria-hidden="true"></i><span class="card-title">Hello Plugin — Extension API example</span></div>
+        </div>
+        <p class="text-secondary text-sm">
+          This entire page is a plugin, loaded via <code>window.RAX_PLUGINS</code>
+          and <code>RaxPluginLoader</code> — no framework file was edited to make
+          it work. Its source is
+          <a href="index.js" class="text-cyan">examples/hello-plugin/index.js</a>,
+          and it uses exactly three registration calls:
+        </p>
+        <ul class="text-secondary text-sm" style="margin:12px 0 0 18px;">
+          <li><code>RaxRegistry.registerWidget()</code> — the card below</li>
+          <li><code>RaxRegistry.registerCommand()</code> — open the command palette (<kbd>Ctrl/Cmd+K</kbd>) and run "Say Hello"</li>
+          <li><code>RaxRegistry.registerPage()</code> — this page itself</li>
+        </ul>
+      </div>
+
+      <div class="grid grid-4" id="hello-plugin-widgets"></div>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast-stack-mount" class="toast-stack" aria-live="polite"></div>
+<div id="modal-host-mount"></div>
+
+<script>window.RAX_PLUGINS = ['./index.js'];</script>
+
+<script src="../../assets/js/events.js"></script>
+<script src="../../assets/js/registry.js"></script>
+<script src="../../assets/js/utils.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/plugin-loader.js"></script>
+<script src="../../assets/js/components/sidebar.js"></script>
+<script src="../../assets/js/components/topbar.js"></script>
+<script src="../../assets/js/components/card.js"></script>
+<script src="../../assets/js/components/widget.js"></script>
+<script src="../../assets/js/components/modal.js"></script>
+<script src="../../assets/js/components/table.js"></script>
+<script src="../../assets/js/components/tabs.js"></script>
+<script src="../../assets/js/components/toast.js"></script>
+<script src="../../assets/js/notifications.js"></script>
+<script src="../../assets/js/search.js"></script>
+<script src="../../assets/js/command-palette.js"></script>
+<script src="../../assets/js/navigation.js"></script>
+<script src="../../assets/js/menu-config.js"></script>
+<script src="../../assets/js/commands-config.js"></script>
+<script src="../../assets/js/core.js"></script>
+<script>
+  RaxNavigation.mount({ active: 'hello-plugin', title: 'Hello Plugin', crumb: '/ Plugins / Hello Plugin', search: 'Search…' });
+  RaxPluginLoader.loadAll().then(function () { RaxCore.boot(); });
+</script>
+</body>
+</html>

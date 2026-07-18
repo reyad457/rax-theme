@@ -32,7 +32,7 @@ RaxComponents.Card.mount(el, {
 ```
 
 Live on 13 instances across `dashboard.html`, `interfaces.html`, `vpn.html`,
-`suricata.html` as of Phase D/E.
+`suricata.html`.
 
 **Not a fit for:** any card whose header needs something other than a status
 pill (e.g. a toggle switch) — see `pages/suricata.js`'s documented exception

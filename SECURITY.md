@@ -49,6 +49,12 @@ report categories:
 - Vulnerabilities in Chart.js or Lucide upstream — report those to their own
   repositories.
 - The absence of Subresource Integrity (SRI) hashes on the CDN `<script>`
-  tags is a **known, tracked limitation**, not a new report — see
-  `PHASE-E-TECHNICAL-DEBT.md` for why it hasn't been added yet and the exact
-  command to generate one.
+  tags is a **known, tracked limitation** (see `ROADMAP.md`), not a new
+  report. To add one, from a machine that can reach the CDN in question:
+
+  ```bash
+  curl -s <script-url> | openssl dgst -sha384 -binary | openssl base64 -A
+  ```
+
+  Prefix the result with `sha384-` and add it as the `integrity` attribute
+  on the corresponding `<script>` tag, along with `crossorigin="anonymous"`.

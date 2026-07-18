@@ -1,6 +1,6 @@
 # RAX Theme — Theming Guide
 
-## Verification (Phase E objective 5)
+## Verification
 
 Each claim below was checked against the actual source, not assumed.
 
@@ -8,13 +8,13 @@ Each claim below was checked against the actual source, not assumed.
 |---|---|
 | **Accent switching** | `RaxTheme.setAccent(name)` sets `data-accent` on `<html>`, which `theme.css`'s `[data-accent="..."]` blocks resolve into `--accent`, `--accent-glow`, and `--chart-series-1..4`. Verified all 5 built-in accents (cyan/emerald/purple/red/orange) have a complete block defining all 4 tokens. |
 | **Dark/light mode** | `RaxTheme.setMode(mode)` sets `data-mode` on `<html>`; `theme.css`'s `[data-mode="dark"]`/`[data-mode="light"]` blocks resolve `--surface-*`/`--text-*`/`--border-*`. Verified both blocks define the same token set (no token exists in one mode and not the other — checked by diffing the property names in each block). |
-| **CSS token inheritance** | Every `components/*.css` file was grepped for raw hex colors, raw `rgba(...)` literals outside `theme.css`/`variables.css`, and raw pixel shadow/spacing values. None found outside the two token files and the handful of documented per-instance exceptions (diagram node coordinates, `--fill`/`--gauge-percent` data values) already disclosed in the Phase C review. |
+| **CSS token inheritance** | Every `components/*.css` file was grepped for raw hex colors, raw `rgba(...)` literals outside `theme.css`/`variables.css`, and raw pixel shadow/spacing values. None found outside the two token files and the handful of documented per-instance exceptions (diagram node coordinates, `--fill`/`--gauge-percent` data values) documented in `docs/architecture.md`. |
 | **Runtime updates** | `theme:change` fires on every `setMode`/`setAccent`/`setCustomAccent`/`toggleMode` call. `charts.js` is the one framework module that must react imperatively (Chart.js bakes colors into canvas draw calls, unlike CSS) — see the fix below. |
-| **Every component reacts correctly** | **Gap found and fixed in Phase E** — see below. |
+| **Every component reacts correctly** | **Gap found and fixed** — see below. |
 
 ### Gap found: charts didn't actually follow the accent
 
-Before Phase E, `charts.js`'s `theme:change` handler only updated
+Previously, `charts.js`'s `theme:change` handler only updated
 `Chart.defaults.color` (the shared axis/tick text color). Each chart's own
 dataset `borderColor`/`backgroundColor` were hardcoded hex strings baked into
 the config at creation time in each page module — switching accents changed

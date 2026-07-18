@@ -27,8 +27,8 @@ What does this PR change, and why?
       contract, or event (see `docs/api-classification.md` for what counts
       as public).
 - [ ] `CHANGELOG.md` updated under `[Unreleased]`.
-- [ ] Manually re-ran the validation checks in `CONTRIBUTING.md` /
-      `PHASE-E-MIGRATION-REPORT.md` §8 against changed files (no CI yet).
+- [ ] Manually ran the checks in `CONTRIBUTING.md`'s "Validating your change"
+      section against changed files (no CI yet).
 
 ## Does this change the public API?
 

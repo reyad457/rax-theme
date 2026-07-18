@@ -1,7 +1,6 @@
 # RAX Theme — Event Catalog
 
-Every event name that exists anywhere in the framework, reviewed together in
-Phase E. Built by grepping every `RaxEvents.emit(`/`.on(`/`.once(` call site in
+Every event name that exists anywhere in the framework. Built by grepping every `RaxEvents.emit(`/`.on(`/`.once(` call site in
 `assets/js/` — this list is exhaustive, not illustrative.
 
 All events go through `RaxEvents` (`assets/js/events.js`) — `on(name, handler)`,
@@ -14,9 +13,9 @@ All events go through `RaxEvents` (`assets/js/events.js`) — `on(name, handler)
 Event names follow `noun:verb` (e.g. `theme:change`, `toast:show`). A few
 pre-existing names mix imperative and past-tense verbs (`modal:close` vs.
 `modal:closed`); this is a **deliberate, not accidental**, pair — see the
-Modal section below. No event was renamed in Phase E: the objective explicitly
-rules out breaking API changes, and every one of these names has been public
-since Phase C/D. New events introduced by the framework going forward should
+Modal section below. Event names are treated as part of the stable Public
+API (see `docs/api-classification.md`) and are not renamed once shipped.
+New events introduced by the framework going forward should
 follow `noun:verb` for actions and `noun:verb-past` for after-the-fact
 notifications, matching the Modal pair.
 
@@ -47,8 +46,8 @@ notifications, matching the Modal pair.
 - **Payload:** `{ title: string, body: string }`
 - **Consumed by:** `components/modal.js`.
 - **Status:** no built-in emitter (available for plugin use) — same situation
-  Phase C/D already documented for `registerWidget`/`registerCommand` before
-  Phase D exercised them. Not dead code; an unexercised extension point.
+  already documented for `registerWidget`/`registerCommand` before something
+  in the app started calling them. Not dead code; an unexercised extension point.
 
 ## `modal:close`
 
@@ -71,8 +70,7 @@ notifications, matching the Modal pair.
 - **Status:** genuinely unexercised on both ends within the shipped app, kept
   because "know when the modal finished closing" is a real, common need for
   any plugin that opens a modal and wants to do something after (e.g. refresh
-  a table). Flagged explicitly in the Phase E technical debt report rather
-  than silently left unexplained.
+  a table). Flagged explicitly here rather than silently left unexplained.
 
 ## `search:results`
 
@@ -80,17 +78,17 @@ notifications, matching the Modal pair.
   page's registered provider.
 - **Payload:** `{ pageId: string, term: string, results: any[] }`
 - **Consumed by:** `components/topbar.js` (drives the visually-hidden
-  `aria-live` results announcement added in Phase D).
+  `aria-live` results announcement).
 
 ## `registry:change`
 
 - **Emitted by:** `registry.js`, from every `register*` call.
-- **Payload (Phase E, standardized):** `{ type: 'page'|'menuItem'|'widget'|'command', id: string }`
-  — before Phase E, the `menuItem` case used `pageId` instead of `id`; every
+- **Payload (standardized):** `{ type: 'page'|'menuItem'|'widget'|'command', id: string }`
+  — the `menuItem` case previously used `pageId` instead of `id`; every
   emit now consistently uses `id` (for menu items, `id` is the item's
   `pageId`, since menu items don't have a separate identity). This is
-  additive — nothing in Phase C/D ever read the old `pageId` key, so no
-  consumer breaks.
+  additive — nothing that reads this event ever depended on the old `pageId`
+  key, so no consumer breaks.
 - **Consumed by:** `components/sidebar.js` (re-renders when a `menuItem` change
   arrives — e.g. a plugin registering its own nav entry after initial mount).
 
@@ -133,8 +131,8 @@ None were removed:
 - Removing them would be indistinguishable from a breaking API change for any
   future plugin relying on the framework doing exactly what's documented here.
 - Each has a concrete, named use case above, not a hypothetical one.
-- This mirrors the same judgment call Phase C/D already made for
-  `registerWidget()`/`registerCommand()` before Phase D exercised them —
+- This mirrors the same judgment call already made for `registerWidget()`/
+  `registerCommand()` before something in the app started exercising them —
   "unexercised" and "dead" are treated as different things throughout this
   project, and are called out explicitly rather than left for someone to
   rediscover.

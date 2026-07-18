@@ -1,4 +1,4 @@
-# RAX Theme — API Classification (Phase E)
+# RAX Theme — API Classification
 
 Every function exported by every framework module, classified as **Public**
 (part of the stable Extension API contract — plugins should use these),
@@ -31,7 +31,7 @@ design (it's the entire communication mechanism).
 | `registerPage`, `registerMenuItem`, `registerWidget`, `registerCommand`, `registerSearchProvider` | **Public** | The Extension API core — see `docs/plugin-api.md`. |
 | `getPage`, `getMenuItems`, `getWidgets`, `getCommands` | **Public** | Read-only accessors; safe for a plugin to introspect current registrations (e.g. to avoid re-registering an id). |
 
-`registerSearchProvider` is new in Phase E (previously only reachable via
+`registerSearchProvider` is an addition (previously only reachable via
 `RaxSearch.registerProvider` — both still work, this is additive).
 
 ## RaxSearch (`search.js`)
@@ -48,8 +48,8 @@ design (it's the entire communication mechanism).
 | `getMode`, `setMode`, `toggleMode` | **Public** | |
 | `getAccent`, `setAccent` | **Public** | `setAccent` now also accepts any name registered via `registerTheme`. |
 | `setCustomAccent(hex)` | **Public** | One-off, unnamed accent override — kept distinct from `registerTheme` (see `docs/theming.md`). |
-| `registerTheme(name, def)` | **Public** | New in Phase E — the theme Extension API. |
-| `getRegisteredThemes()` | **Public** | New in Phase E — lets a plugin (or the palette, in a future phase) list available custom themes. |
+| `registerTheme(name, def)` | **Public** | The theme Extension API. |
+| `getRegisteredThemes()` | **Public** | Lets a plugin (or the palette, in a future release) list available custom themes. |
 | `init()` | **Internal** | Called exactly once, by `RaxCore.boot()`. A plugin has no reason to call this itself. |
 
 ## RaxCharts (`charts.js`)
@@ -84,7 +84,7 @@ design (it's the entire communication mechanism).
 |---|---|---|
 | `boot()` | **Public (page-author-facing)** | Every page calls this exactly once, after `RaxPluginLoader.loadAll()` resolves. |
 
-## RaxPluginLoader (`plugin-loader.js`) — new in Phase E
+## RaxPluginLoader (`plugin-loader.js`)
 
 | Export | Classification | Notes |
 |---|---|---|
@@ -97,8 +97,8 @@ design (it's the entire communication mechanism).
 |---|---|---|
 | `qs`, `qsa`, `dom`, `debounce` | **Internal** | Convenience helpers used throughout the framework's own components. Usable by plugins, but **not covered by the same compatibility guarantee** as the modules above — `dom()`'s hyperscript-style signature in particular is an implementation convenience, not a designed public contract, and could change shape in a future phase. Plugins are free to use plain DOM APIs instead. |
 | `formatNumber`, `formatBytes` | **Internal** | Same reasoning — thin enough that most plugins won't need them, kept internal-but-accessible rather than public-and-frozen. |
-| `readCssVar` | **Public** | Explicitly useful and stable for any plugin/widget that wants to read a design token at runtime (e.g. to draw a canvas element in the current accent color). Promoted to Public in Phase E because `RaxCharts`' own color-binding feature depends on exactly this being a reliable, documented function. |
-| `hexToRgba` | **Public** | New in Phase E (extracted from `theme.js` to remove duplication). Genuinely useful for any plugin building translucent fills that match the current accent, same reasoning as `readCssVar`. |
+| `readCssVar` | **Public** | Explicitly useful and stable for any plugin/widget that wants to read a design token at runtime (e.g. to draw a canvas element in the current accent color). Promoted to Public because `RaxCharts`' own color-binding feature depends on exactly this being a reliable, documented function. |
+| `hexToRgba` | **Public** | Extracted from `theme.js` to remove duplication. Genuinely useful for any plugin building translucent fills that match the current accent, same reasoning as `readCssVar`. |
 
 ## RaxComponents.* (`components/*.js`)
 
@@ -106,20 +106,22 @@ Every component's `mount`/`update`/`destroy` triad:
 
 | Component | Classification | Notes |
 |---|---|---|
-| `Card`, `Widget`, `Modal`, `Table`, `Tabs`, `Toast` | **Public** | These are the reusable building blocks Phase B promised plugin authors — use them for a consistent look instead of hand-rolling markup. |
+| `Card`, `Widget`, `Modal`, `Table`, `Tabs`, `Toast` | **Public** | These are the reusable building blocks plugin authors should use for a consistent look instead of hand-rolling markup. |
 | `Sidebar`, `Topbar` | **Internal** | Framework-owned shell singletons, mounted exactly once by `navigation.js`. A plugin should never call `RaxComponents.Sidebar.mount()` itself — it would create a second sidebar. Listed as Internal, not Private, because a plugin author reading the source should understand *why* it exists, even though calling it directly is unsupported. |
 
 ---
 
 ## Exports reduced or removed
 
-**None removed** — Phase E objective 9 explicitly rules out breaking changes,
-and this audit didn't find any export that was genuinely dead (every function
-either has a real call site today, per the Phase C/D verification greps, or is
+**None removed** — breaking changes to any function/event/component
+classified **Public** here are treated as a major-version change once this
+project adopts semantic versioning, so removing one is a deliberate, rare
+decision, not a routine cleanup — and this audit didn't find any export that
+was genuinely dead: every function either has a real call site today or is
 an intentional, documented extension point with zero built-in consumers —
 e.g. `Modal`'s `modal:close` trigger, `RaxRegistry.getWidgets()`).
 
-What Phase E did instead, in place of removing exports:
+What happened instead, in place of removing exports:
 - **Consolidated** duplicate hex-parsing logic (`theme.js`'s old private
   `hexToGlow` helper) into one shared, now-Public `RaxUtils.hexToRgba`.
 - **Reclassified** `RaxUtils.readCssVar` from an unremarked internal helper to

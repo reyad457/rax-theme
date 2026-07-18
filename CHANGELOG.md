@@ -2,25 +2,52 @@
 
 All notable changes to this project are documented in this file. Format
 loosely follows [Keep a Changelog](https://keepachangelog.com/); this project
-is pre-1.0, so changes are grouped by development phase rather than by
+is pre-1.0, so early entries are grouped by development stage rather than by
 semantic version until the `v1.0.0` tag.
 
-## [Unreleased] — Phase F: Open Source Release Preparation
+## [Unreleased] — Release Candidate 1
 
 ### Added
-- Full repository documentation set: `CONTRIBUTING.md`, `CHANGELOG.md`,
-  `ROADMAP.md`, `LICENSE` (MIT), `CODE_OF_CONDUCT.md`, `SECURITY.md`.
-- `.github/` community health files: issue templates, PR template, discussion
-  template.
-- `docs/project-structure.md` and an architecture diagram
-  (`docs/architecture-diagram.md`, Mermaid).
-- `RELEASE_NOTES_v1.md` and `FIRST_RELEASE_CHECKLIST.md`.
+- `docs/README.md` — documentation index with a "where to start" table and a
+  recommended reading order (the docs folder previously had no landing page).
+- `examples/hello-plugin/` — a minimal, runnable example of the Extension
+  API using `registerPage()`, `registerWidget()`, and `registerCommand()`
+  only, plus the `RaxComponents.Card` and `RaxNotifications` Public APIs to
+  actually render/react to them.
+- Explicit, self-contained validation checklist in `CONTRIBUTING.md`
+  ("Validating your change") — runnable directly, no other document needed.
 
 ### Changed
-- README rewritten from scratch for public release (was still describing the
-  Phase 1 file layout).
-- Branding standardized to "RAX Theme — Modern OPNsense-inspired Dashboard
-  Framework" across every document.
+- Development-history and phase-report documents removed from the public
+  repository root; `CHANGELOG.md` remains the single human-readable history.
+- Every reference to a now-removed phase report, across `CONTRIBUTING.md`,
+  `SECURITY.md`, `ROADMAP.md`, `.github/PULL_REQUEST_TEMPLATE.md`, and
+  `docs/project-structure.md`, replaced with self-contained content (the
+  actual checklist, the actual command, etc.) instead of a pointer to a
+  document that no longer exists in the repo.
+- `docs/architecture.md` retitled from "Architecture (as of Phase E)" to
+  "Architecture" and rewritten to describe the current system as current
+  fact rather than framing everything relative to a development phase.
+- `README.md`: Installation and Quick Start no longer give ambiguous
+  instructions — Installation is now the single definitive "how to run
+  this" section, including an explicit, honest answer on `file://` support
+  (works, with one `localStorage`-persistence caveat under some browsers).
+  Placeholder GitHub URL replaced with an explicit `TODO` comment. Added a
+  "A note on naming" section explaining the `Rax`/`RaxComponents` prefix
+  convention before it's used in any code sample. Added direct links to
+  `docs/api-classification.md`, `docs/plugin-api.md`, and
+  `docs/component-api.md`.
+- `ROADMAP.md` rewritten without phase-number labels; example plugin and
+  open-source release prep moved from "planned" to "Completed."
+
+## Phase F — Open Source Release Preparation
+
+Produced the repository's first full documentation set (README, CONTRIBUTING,
+this file, ROADMAP, LICENSE, CODE_OF_CONDUCT, SECURITY), GitHub community
+health files, an expanded `docs/` folder, and a release-readiness audit.
+Full detail was captured in that phase's own reports at the time; see
+Release Candidate 1 above for what changed once those reports were reviewed
+by an external-perspective audit and retired from the public repo.
 
 ## Phase E — Framework Stabilization & Extension API
 

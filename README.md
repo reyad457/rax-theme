@@ -27,12 +27,22 @@ interfaces — Palo Alto, Cisco Secure, Fortinet, CrowdStrike Falcon, Microsoft
 Defender XDR — deliberately **professional and minimal**, not a "movie
 hacker" theme.
 
+### A note on naming
+
+Every framework module attaches exactly one global, prefixed `Rax`:
+`RaxTheme`, `RaxRegistry`, `RaxCharts`, `RaxEvents`, and so on — you'll see
+this convention throughout the code samples below and across `docs/`.
+Reusable UI pieces (`Card`, `Widget`, `Table`...) are properties on a shared
+`RaxComponents` namespace instead of their own globals, e.g.
+`RaxComponents.Card.mount(...)`.
+
 ## Features
 
 - **5 built-in console pages** — Dashboard, Interfaces & VLANs, VPN & Tailscale,
   Suricata IDS/IPS, Logs & Tables (firewall logs, DHCP leases, aliases, NAT rules)
 - **Zero build step** — plain HTML + classic `<script>` tags, runs from any
-  static file server (or `file://`) with no bundler, no `npm install`
+  static file server with no bundler, no `npm install` (see Installation
+  below for the one caveat around opening files directly via `file://`)
 - **Token-driven design system** — a 3-tier CSS custom property architecture
   (primitive → semantic → component) means every color, spacing value, radius,
   shadow, and timing curve lives in exactly one place
@@ -94,6 +104,7 @@ rax-theme/
 │   ├── DISCUSSION_TEMPLATE/       ideas.md
 │   └── PULL_REQUEST_TEMPLATE.md
 ├── docs/
+│   ├── README.md                   documentation index — start here
 │   ├── architecture.md            system design, layered CSS, boot sequence
 │   ├── project-structure.md       annotated file-by-file folder guide
 │   ├── component-api.md           every RaxComponents.* contract
@@ -102,7 +113,9 @@ rax-theme/
 │   ├── events.md                  the full framework event catalog
 │   └── api-classification.md      Public / Internal / Private, per export
 ├── plugins/
-│   └── README.md                  plugin folder convention (no example plugin yet)
+│   └── README.md                  plugin folder convention
+├── examples/
+│   └── hello-plugin/               worked Extension API example
 ├── dashboard.html, interfaces.html, vpn.html, suricata.html, logs.html
 └── assets/
     ├── css/                       variables, theme, layout, utilities,
@@ -118,11 +131,12 @@ Full annotated version: [`docs/project-structure.md`](docs/project-structure.md)
 
 ## Installation
 
-No build step, no package manager. Clone or download the repository and serve
-it with any static file server:
+No build step, no package manager. Clone or download the repository, then
+serve it with any static file server:
 
 ```bash
-git clone https://github.com/<your-org>/rax-theme.git
+# TODO: replace with the actual repository URL once published
+https://github.com/reyad457/rax-theme.git
 cd rax-theme
 python3 -m http.server 8080
 # then open http://localhost:8080/dashboard.html
@@ -131,9 +145,21 @@ python3 -m http.server 8080
 Any static host works equally well (nginx, Caddy, GitHub Pages, or OPNsense's
 own web server once integrated as a theme).
 
+**Does it work by just double-clicking `dashboard.html` (`file://`), with no
+server at all?** Mostly yes, with one caveat: every script and stylesheet
+loads via plain relative paths and `<script src>` tags (no `fetch()`/XHR
+anywhere in the framework), which browsers load fine from `file://`. The one
+thing that can behave differently is theme/accent persistence across page
+reloads, which uses `localStorage` — some browsers restrict storage APIs
+under the `file://` origin. If that happens, the app still works correctly;
+your theme choice just won't be remembered between visits. **For guaranteed
+full functionality, use the server command above** — it costs one extra
+terminal command and removes any ambiguity.
+
 ## Quick start
 
-Open [`dashboard.html`](dashboard.html) in a browser. From there:
+Once the app is running (see Installation above), open
+[`dashboard.html`](dashboard.html):
 
 - Use the sidebar to visit the other 4 pages.
 - Press **`Ctrl/Cmd+K`** to open the command palette — try "Toggle Theme" or
@@ -183,8 +209,10 @@ providers, widgets, and themes — without ever editing a framework file:
 
 `RaxPluginLoader` loads every declared plugin before `RaxCore.boot()` runs, so
 registrations are always in place before the sidebar renders and the active
-page module boots. Full reference, including the complete lifecycle diagram:
-[`docs/plugin-api.md`](docs/plugin-api.md).
+page module boots. A complete, runnable example using `registerPage`,
+`registerWidget`, and `registerCommand` is in
+[`examples/hello-plugin/`](examples/hello-plugin/). Full reference, including
+the complete lifecycle diagram: [`docs/plugin-api.md`](docs/plugin-api.md).
 
 ## Component system
 
@@ -217,11 +245,23 @@ Built on modern, broadly-supported web platform features:
 No IE11 support. No polyfills are bundled — if you need to support an older
 browser, `color-mix()` is the most likely feature to require a fallback.
 
+## Documentation
+
+Start at [`docs/README.md`](docs/README.md) for the full documentation index
+and recommended reading order. Most frequently needed while building
+something:
+
+- [`docs/api-classification.md`](docs/api-classification.md) — every
+  exported function, classified Public/Internal/Private, with why.
+- [`docs/plugin-api.md`](docs/plugin-api.md) — the complete Extension API
+  reference and plugin lifecycle.
+- [`docs/component-api.md`](docs/component-api.md) — every `RaxComponents.*`
+  contract and `props` shape.
+
 ## Roadmap
 
-See [`ROADMAP.md`](ROADMAP.md) for the full phase-by-phase history and
-what's planned next (example plugin, dashboard widget customization, CI,
-visual regression testing).
+See [`ROADMAP.md`](ROADMAP.md) for what's done and what's planned next (CI,
+visual regression testing, dashboard widget customization).
 
 ## Contributing
 

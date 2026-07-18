@@ -1,9 +1,8 @@
 # RAX Theme plugins/
 
-This folder is where third-party plugins live. It is intentionally empty —
-Phase E (framework stabilization) explicitly does not ship an example plugin.
-See `docs/plugin-api.md` for the full guide; this file is just the folder-level
-convention.
+This folder is where third-party plugins live. A worked example is in
+[`examples/hello-plugin/`](../examples/hello-plugin/). See `docs/plugin-api.md`
+for the full guide; this file is just the folder-level convention.
 
 ## Convention
 
