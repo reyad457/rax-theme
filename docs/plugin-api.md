@@ -7,8 +7,10 @@ compatibility contract, even if technically reachable.
 
 A plugin **never** edits a framework file (`core.js`, `registry.js`,
 `navigation.js`, any `components/*.js`, any `components/*.css`). Everything a
-plugin needs is reachable through the six `register*` functions below, plus
-the shared UI components documented in `docs/component-api.md`.
+plugin needs is reachable through the `register*` functions below, the
+shared UI components documented in `docs/component-api.md`, and — if the
+host application needs real access control — the auth provider API
+documented in `docs/auth-api.md`.
 
 ---
 
@@ -35,28 +37,35 @@ the theme. See `plugins/README.md` for the plugin file convention itself.
 ### Lifecycle diagram
 
 ```
-1. Framework scripts load (events, registry, utils, theme, components, services)
+1. Framework scripts load (events, registry, utils, theme, auth,
+   plugin-loader, components, services)
 2. RaxNavigation.mount({...}) — reserves the sidebar/topbar DOM, page id is now known
 3. RaxPluginLoader.loadAll()
      → each plugins/*/index.js runs, calling registerPage/registerMenuItem/
-       registerCommand/registerSearchProvider/registerWidget/registerTheme
+       registerCommand/registerSearchProvider/registerWidget/registerTheme/
+       registerSettingsPage/registerNotification/registerPermission/
+       RaxAuth.registerProvider
 4. RaxCore.boot()
      → RaxTheme.init()            (sees any registerTheme() calls from step 3)
      → mounts ToastStack/ModalHost
      → wires button ripple
-     → RaxRegistry.getPage(pageId).init()   (the ACTIVE page's own module — built-in
-       or a plugin's, whichever matches document.body.dataset.page)
+     → RaxAuth.beforeRoute(pageId)   (sees any registerProvider() call from
+       step 3 — resolves true immediately if no provider is registered)
+     → if allowed: RaxRegistry.getPage(pageId).init()   (the ACTIVE page's own
+       module — built-in or a plugin's, whichever matches
+       document.body.dataset.page)
      → wires card entrance animation
      → lucide.createIcons()
 ```
 
 A plugin registering a *page* only has its `init()` called if that plugin's
 own HTML page is the one currently loaded (`document.body.dataset.page`
-matches). A plugin registering a *menu item*, *command*, or *theme* has that
-registration take effect on every page that loads the plugin — which is why a
-plugin's menu item / command registration should typically happen on every
-page (declare the plugin in every page's `RAX_PLUGINS`), while a plugin's page
-module logic only runs on its own page.
+matches). A plugin registering a *menu item*, *command*, *theme*, *settings
+page*, *notification*, *permission*, or an *auth provider* has that
+registration take effect on every page that loads the plugin — which is why
+those registrations should typically happen on every page (declare the
+plugin in every page's `RAX_PLUGINS`), while a plugin's page module logic
+only runs on its own page.
 
 ---
 
@@ -153,6 +162,65 @@ Registers a named, reusable accent theme. Full detail, including the boot
 lifecycle requirement (must run before `RaxCore.boot()`), is in
 `docs/theming.md`.
 
+## `RaxRegistry.registerSettingsPage({ id, label, icon, section, order, render })`
+
+Declares a settings page. `render` is a function your plugin defines and is
+responsible for calling yourself (e.g. from your own page's `init()`) —
+`registerSettingsPage()` only stores the registration; RAX Theme does not
+ship a settings hub UI that consumes it automatically today. This is the
+same "storage now, consuming UI later" pattern as `registerWidget()`.
+
+```js
+RaxRegistry.registerSettingsPage({
+  id: 'backup-schedule',
+  label: 'Backup Schedule',
+  icon: 'clock',
+  section: 'Plugins',
+  order: 10,
+  render: function (container) { /* render your settings form into container */ },
+});
+```
+
+## `RaxRegistry.registerNotification({ id, type, message, icon, timestamp })`
+
+Registers a persistent notification (distinct from the transient toasts
+`RaxNotifications.toast()` shows — see `docs/component-api.md`'s Toast
+section). `RaxRegistry.getNotifications()` returns everything registered,
+newest first. Like `registerSettingsPage()`, this is storage only — no
+notification-center UI exists in the built-in app yet to display these.
+
+```js
+RaxRegistry.registerNotification({
+  id: 'backup-failed-' + Date.now(),
+  type: 'danger',
+  message: 'Nightly backup failed — disk full',
+  icon: 'alert-triangle',
+});
+```
+
+## `RaxRegistry.registerPermission({ id, label, description })`
+
+Declares a permission your plugin defines or checks. This is metadata only —
+it doesn't grant or enforce anything by itself. The actual runtime check
+always goes through `RaxAuth.hasPermission(permissionId)`, documented in
+full in [`docs/auth-api.md`](auth-api.md).
+
+```js
+RaxRegistry.registerPermission({
+  id: 'backups.run',
+  label: 'Run Backups',
+  description: 'Allows manually triggering an on-demand backup.',
+});
+```
+
+## Authentication — `RaxAuth`
+
+RAX Theme has no built-in login page or auth backend. If your host
+application needs real access control, register an auth provider — a
+complete, dedicated guide (interface contract, lifecycle, an illustrative
+example, and the exact backward-compatible default behavior when no
+provider is registered) is in [`docs/auth-api.md`](auth-api.md).
+
 ---
 
 ## Shared UI components available to plugins
@@ -175,3 +243,6 @@ framework-owned singletons; do not mount these yourself.
 - Reach into another component's returned `instance` object — the only
   supported interaction is through a component's own `mount`/`update`/`destroy`
   and the shared event bus (`docs/events.md`).
+- Assume your auth provider is the only one that will ever be registered —
+  `RaxAuth` supports exactly one active provider; registering a second
+  replaces the first (see `docs/auth-api.md`).

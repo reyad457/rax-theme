@@ -5,6 +5,37 @@ loosely follows [Keep a Changelog](https://keepachangelog.com/); this project
 is pre-1.0, so early entries are grouped by development stage rather than by
 semantic version until the `v1.0.0` tag.
 
+## [Unreleased] — Auth Extension API & Expanded Plugin Registry
+
+### Added
+- `RaxAuth` (`assets/js/auth.js`) — a provider-based authentication
+  extension point supporting `currentUser()`, `login()`, `logout()`,
+  `hasPermission()`, `beforeRoute()`, `afterLogin()`, `afterLogout()`. RAX
+  Theme itself implements no real authentication — no login page, no
+  credential storage, no session handling. Default behavior with no
+  provider registered is fully permissive (`hasPermission()` → `true`,
+  `beforeRoute()` → never blocks), which is what keeps this addition
+  backward compatible with every existing page. Full reference:
+  `docs/auth-api.md`.
+- `RaxRegistry.registerSettingsPage()`, `registerNotification()`, and
+  `registerPermission()` — three new storage-only registrations (plus their
+  `get*` accessors), extending the plugin system alongside the existing
+  `registerWidget()` (dashboard widgets) and `registerMenuItem()` (sidebar
+  items). No consuming UI exists for settings pages or notifications yet,
+  same situation `registerWidget()` was in before dashboard customization
+  was built — see `ROADMAP.md`.
+- `RaxCore.boot()` now calls `RaxAuth.beforeRoute()` before booting the
+  active page module, making `beforeRoute()` a real, exercised hook rather
+  than a documented-only function. Provably backward compatible: with no
+  provider registered, this resolves `true` immediately and behaves exactly
+  as the previous synchronous `bootPageModule()` call always did.
+
+### Changed
+- `docs/plugin-api.md`, `docs/api-classification.md`, `docs/events.md`
+  (3 new `auth:*` events), `docs/architecture.md`, `docs/README.md`, and
+  `README.md` all updated to document the above. No existing documented
+  behavior changed — these are additive sections throughout.
+
 ## [Unreleased] — Release Candidate 1
 
 ### Added

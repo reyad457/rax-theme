@@ -32,6 +32,35 @@ notifications, matching the Modal pair.
 - **Available for:** any plugin widget that draws its own canvas/SVG and needs
   to know when to re-read CSS custom properties.
 
+## `auth:login`
+
+- **Emitted by:** `auth.js`, from `RaxAuth.login()`, after the registered
+  provider's `login()` (and `afterLogin()`, if defined) resolve successfully.
+- **Payload:** `{ user: <whatever the provider's login() resolved to> }`
+- **Consumed by:** nothing in the built-in framework today.
+- **Status:** available for plugin use — e.g. a plugin widget that shows a
+  "Welcome back" toast or refreshes user-specific data. See `docs/auth-api.md`.
+
+## `auth:logout`
+
+- **Emitted by:** `auth.js`, from `RaxAuth.logout()`, after the registered
+  provider's `logout()` (and `afterLogout()`, if defined) resolve successfully.
+- **Payload:** none.
+- **Consumed by:** nothing in the built-in framework today.
+- **Status:** available for plugin use, same reasoning as `auth:login`.
+
+## `auth:change`
+
+- **Emitted by:** `auth.js`, after every successful `registerProvider()`,
+  `login()`, and `logout()` call — a single, generic "auth state may have
+  changed" signal for code that doesn't care *which* of the three happened,
+  only that it should re-check `RaxAuth.currentUser()`/`hasPermission()`.
+- **Payload:** `{ reason: 'provider-registered'|'login'|'logout' }`
+- **Consumed by:** nothing in the built-in framework today.
+- **Status:** available for plugin use — e.g. a sidebar item that shows/hides
+  itself based on the current permission set would listen here rather than
+  duplicating listeners on both `auth:login` and `auth:logout`.
+
 ## `toast:show`
 
 - **Emitted by:** `notifications.js`, from `RaxNotifications.toast()`.
@@ -83,7 +112,7 @@ notifications, matching the Modal pair.
 ## `registry:change`
 
 - **Emitted by:** `registry.js`, from every `register*` call.
-- **Payload (standardized):** `{ type: 'page'|'menuItem'|'widget'|'command', id: string }`
+- **Payload (standardized):** `{ type: 'page'|'menuItem'|'widget'|'command'|'settingsPage'|'notification'|'permission', id: string }`
   — the `menuItem` case previously used `pageId` instead of `id`; every
   emit now consistently uses `id` (for menu items, `id` is the item's
   `pageId`, since menu items don't have a separate identity). This is
@@ -123,10 +152,10 @@ names, not a duplicate of the same event.)
 
 ## Dead events found
 
-Three events are emitted with zero built-in listeners (`modal:closed`,
-`nav:change`, `sidebar:toggle`), and one is listened for with zero built-in
-emitters (`modal:close`, `modal:open` — both intentionally plugin-triggered).
-None were removed:
+Six events are emitted with zero built-in listeners (`modal:closed`,
+`nav:change`, `sidebar:toggle`, `auth:login`, `auth:logout`, `auth:change`),
+and one is listened for with zero built-in emitters (`modal:close`,
+`modal:open` — both intentionally plugin-triggered). None were removed:
 
 - Removing them would be indistinguishable from a breaking API change for any
   future plugin relying on the framework doing exactly what's documented here.
@@ -135,4 +164,6 @@ None were removed:
   `registerCommand()` before something in the app started exercising them —
   "unexercised" and "dead" are treated as different things throughout this
   project, and are called out explicitly rather than left for someone to
-  rediscover.
+  rediscover. The 3 `auth:*` events are unexercised for the same reason
+  `RaxAuth` itself is: this repository ships zero auth providers by design
+  (see `docs/auth-api.md`) — there is nothing to listen for yet, on purpose.

@@ -29,7 +29,8 @@ design (it's the entire communication mechanism).
 | Export | Classification | Notes |
 |---|---|---|
 | `registerPage`, `registerMenuItem`, `registerWidget`, `registerCommand`, `registerSearchProvider` | **Public** | The Extension API core — see `docs/plugin-api.md`. |
-| `getPage`, `getMenuItems`, `getWidgets`, `getCommands` | **Public** | Read-only accessors; safe for a plugin to introspect current registrations (e.g. to avoid re-registering an id). |
+| `registerSettingsPage`, `registerNotification`, `registerPermission` | **Public** | Storage-only registrations (no built-in consuming UI yet) — same classification and same reasoning as `registerWidget` had before Phase D exercised it. See `docs/plugin-api.md`. |
+| `getPage`, `getMenuItems`, `getWidgets`, `getCommands`, `getSettingsPages`, `getNotifications`, `getPermissions` | **Public** | Read-only accessors; safe for a plugin to introspect current registrations (e.g. to avoid re-registering an id, or to build its own settings/notification presentation). |
 
 `registerSearchProvider` is an addition (previously only reachable via
 `RaxSearch.registerProvider` — both still work, this is additive).
@@ -51,6 +52,14 @@ design (it's the entire communication mechanism).
 | `registerTheme(name, def)` | **Public** | The theme Extension API. |
 | `getRegisteredThemes()` | **Public** | Lets a plugin (or the palette, in a future release) list available custom themes. |
 | `init()` | **Internal** | Called exactly once, by `RaxCore.boot()`. A plugin has no reason to call this itself. |
+
+## RaxAuth (`auth.js`)
+
+| Export | Classification | Notes |
+|---|---|---|
+| `registerProvider(provider)` | **Public** | The entire auth extension point — see `docs/auth-api.md`. Only one provider can be active; registering a second replaces the first. |
+| `currentUser()`, `login(credentials)`, `logout()`, `hasPermission(id, context?)`, `beforeRoute(pageId)` | **Public** | Dispatch to the registered provider, with documented, security-relevant defaults when none is registered (see `docs/auth-api.md`) — `hasPermission()` defaults to `true` and `beforeRoute()` defaults to allowing navigation, which is what keeps this module backward compatible with every existing page. |
+| `isProviderRegistered()` | **Public** | Lets a plugin check whether it should render auth-dependent UI before calling `currentUser()`. |
 
 ## RaxCharts (`charts.js`)
 

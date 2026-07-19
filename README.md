@@ -54,8 +54,12 @@ Reusable UI pieces (`Card`, `Widget`, `Table`...) are properties on a shared
   contract
 - **Command palette** (`Ctrl/Cmd+K`) and per-page search, both driven by the
   same registry a plugin uses
-- **Documented Extension API** — register pages, menu items, widgets, commands,
-  search providers, and themes, without editing a single framework file
+- **Documented Extension API** — register pages, menu items, widgets,
+  commands, search providers, themes, settings pages, notifications, and
+  permissions, without editing a single framework file
+- **Provider-based auth extension point** — plug in any authentication
+  system (or none); RAX Theme ships no login page, no backend, and no
+  access control until a host application registers a provider
 - **Accessibility-first** — every icon labeled, every control keyboard-operable,
   focus-trapped modals/palette, `prefers-reduced-motion` and `prefers-contrast`
   both respected
@@ -109,6 +113,7 @@ rax-theme/
 │   ├── project-structure.md       annotated file-by-file folder guide
 │   ├── component-api.md           every RaxComponents.* contract
 │   ├── plugin-api.md              the Extension API + lifecycle
+│   ├── auth-api.md                auth provider extension API (no built-in auth)
 │   ├── theming.md                 accent/mode system + registerTheme()
 │   ├── events.md                  the full framework event catalog
 │   └── api-classification.md      Public / Internal / Private, per export
@@ -136,7 +141,7 @@ serve it with any static file server:
 
 ```bash
 # TODO: replace with the actual repository URL once published
-https://github.com/reyad457/rax-theme.git
+git clone https://github.com/<org>/rax-theme.git
 cd rax-theme
 python3 -m http.server 8080
 # then open http://localhost:8080/dashboard.html
@@ -214,6 +219,26 @@ page module boots. A complete, runnable example using `registerPage`,
 [`examples/hello-plugin/`](examples/hello-plugin/). Full reference, including
 the complete lifecycle diagram: [`docs/plugin-api.md`](docs/plugin-api.md).
 
+## Authentication
+
+RAX Theme ships **no login page and no authentication backend** — instead, a
+provider-based extension point (`RaxAuth`) lets a host application plug in
+whatever auth system it already has:
+
+```js
+RaxAuth.registerProvider({
+  currentUser: function () { /* return the current user, or null */ },
+  hasPermission: function (id, user) { /* real permission check */ },
+  beforeRoute: function (pageId, user) { /* return false to block */ },
+  // login, logout, afterLogin, afterLogout are also supported
+});
+```
+
+With no provider registered — the state of every page in this repository —
+`hasPermission()` returns `true` and `beforeRoute()` never blocks, so nothing
+about existing behavior changes until a host application opts in. Full
+reference: [`docs/auth-api.md`](docs/auth-api.md).
+
 ## Component system
 
 Every reusable UI piece follows one contract:
@@ -255,6 +280,7 @@ something:
   exported function, classified Public/Internal/Private, with why.
 - [`docs/plugin-api.md`](docs/plugin-api.md) — the complete Extension API
   reference and plugin lifecycle.
+- [`docs/auth-api.md`](docs/auth-api.md) — the auth provider extension API.
 - [`docs/component-api.md`](docs/component-api.md) — every `RaxComponents.*`
   contract and `props` shape.
 

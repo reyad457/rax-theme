@@ -12,6 +12,7 @@ your question and what order to read them in if you're starting from zero.
 | Evaluating RAX Theme for the first time | The main [`README.md`](../README.md), then come back here |
 | Setting up a development environment / opening your first PR | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — it links back into this folder where relevant |
 | Building a plugin | [`plugin-api.md`](plugin-api.md), then the worked example in [`../examples/hello-plugin/`](../examples/hello-plugin/) |
+| Adding real access control (login, permissions) to a host application | [`auth-api.md`](auth-api.md) — RAX Theme ships no auth backend itself, only the extension point |
 | Building a new reusable UI component | [`component-api.md`](component-api.md) |
 | Trying to understand *why* the code is structured this way | [`architecture.md`](architecture.md), then [`architecture-diagram.md`](architecture-diagram.md) if you want the visual version |
 | Looking for a specific file's purpose | [`project-structure.md`](project-structure.md) |
@@ -32,10 +33,12 @@ your question and what order to read them in if you're starting from zero.
    fires them, and what (if anything) listens.
 5. [`plugin-api.md`](plugin-api.md) — how everything above comes together
    into the Extension API, plus the plugin loading lifecycle.
-6. [`api-classification.md`](api-classification.md) — the reference table:
+6. [`auth-api.md`](auth-api.md) — the auth provider extension point, if your
+   host application needs real access control (RAX Theme itself ships none).
+7. [`api-classification.md`](api-classification.md) — the reference table:
    every exported function, classified Public/Internal/Private, with the
    reasoning for each classification.
-7. [`project-structure.md`](project-structure.md) — keep this open as a
+8. [`project-structure.md`](project-structure.md) — keep this open as a
    reference while you work; it's not meant to be read start-to-finish.
 
 ## What each file covers, in one line
@@ -52,9 +55,13 @@ your question and what order to read them in if you're starting from zero.
 - **`component-api.md`** — every `RaxComponents.*` component's exact `props`
   shape, with a live-instance count and notes on what each component is and
   isn't a fit for.
-- **`plugin-api.md`** — the six `register*` Extension API functions, the
+- **`plugin-api.md`** — the `register*` Extension API functions, the
   full plugin loading lifecycle (with a diagram), and what plugins must not
   do.
+- **`auth-api.md`** — the provider-based auth extension API
+  (`currentUser`/`login`/`logout`/`hasPermission`/`beforeRoute`/
+  `afterLogin`/`afterLogout`), the permissive-by-default behavior when no
+  provider is registered, and why RAX Theme ships no auth system of its own.
 - **`theming.md`** — the accent/dark-light mode system, verification results
   for each part of the theme engine, and the `registerTheme()` API for
   plugin-defined themes.

@@ -30,6 +30,7 @@ rax-theme/
 │   ├── project-structure.md      This file
 │   ├── component-api.md          Every RaxComponents.* contract + props shape
 │   ├── plugin-api.md             Extension API reference + lifecycle diagram
+│   ├── auth-api.md               Auth provider extension API (no built-in auth)
 │   ├── theming.md                Accent/mode system, registerTheme(), verification results
 │   ├── events.md                 Every framework event: emitter, payload, consumer
 │   └── api-classification.md     Every export classified Public/Internal/Private

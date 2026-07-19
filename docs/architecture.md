@@ -6,10 +6,10 @@ This document describes the system as it currently stands: the layered CSS
 token system, the framework's core JavaScript modules, the boot sequence,
 and the design decisions behind each. For deep dives on specific subsystems,
 see the companion docs in this folder: `component-api.md`, `plugin-api.md`,
-`theming.md`, `events.md`, `api-classification.md`, `project-structure.md`
-(file-by-file guide), and `architecture-diagram.md` (the same architecture as
-Mermaid diagrams). Start with `docs/README.md` if this is your first time in
-this folder.
+`auth-api.md`, `theming.md`, `events.md`, `api-classification.md`,
+`project-structure.md` (file-by-file guide), and `architecture-diagram.md`
+(the same architecture as Mermaid diagrams). Start with `docs/README.md` if
+this is your first time in this folder.
 
 ---
 
@@ -23,6 +23,7 @@ rax-theme/
 │   ├── architecture.md          (this file)
 │   ├── component-api.md
 │   ├── plugin-api.md
+│   ├── auth-api.md
 │   ├── theming.md
 │   ├── events.md
 │   └── api-classification.md
@@ -47,6 +48,7 @@ rax-theme/
         ├── registry.js              RaxRegistry — the Extension API core (pages/menu/widgets/commands/search)
         ├── utils.js                  RaxUtils — shared helpers, incl. hexToRgba/readCssVar
         ├── theme.js                    RaxTheme — mode/accent manager + registerTheme()
+        ├── auth.js                      RaxAuth — provider-based auth extension point (no built-in auth)
         ├── plugin-loader.js              RaxPluginLoader — loads plugins/*/index.js before boot()
         ├── charts.js                      RaxCharts — sole Chart.js caller, with live dataset re-coloring
         ├── notifications.js                RaxNotifications — toast() API
@@ -112,7 +114,7 @@ at the cost of not getting tree-shaking or minification for free. See
 order across every HTML file):
 
 ```
-events → registry → utils → theme → plugin-loader → components/*
+events → registry → utils → theme → auth → plugin-loader → components/*
   → charts → notifications → search → command-palette
   → navigation → menu-config → commands-config → core
   → pages/<this-page>.js
@@ -125,7 +127,7 @@ effect relative to page-module boot — is in `docs/plugin-api.md`.
 
 ## Extension API (summary — full reference in `docs/plugin-api.md`)
 
-Six registration functions, deliberately spread across the module that owns
+Registration functions, deliberately spread across the module that owns
 that concern rather than centralized into one god-object registry:
 
 | Function | Lives in |
@@ -135,18 +137,34 @@ that concern rather than centralized into one god-object registry:
 | `registerWidget` | `RaxRegistry` |
 | `registerCommand` | `RaxRegistry` |
 | `registerSearchProvider` | `RaxSearch` (aliased on `RaxRegistry` for discoverability) |
+| `registerSettingsPage` | `RaxRegistry` |
+| `registerNotification` | `RaxRegistry` |
+| `registerPermission` | `RaxRegistry` |
 | `registerTheme` | `RaxTheme` |
+| `registerProvider` (auth) | `RaxAuth` |
 
-A worked example using the first three of these is in
-[`examples/hello-plugin/`](../examples/hello-plugin/).
+A worked example using `registerPage`, `registerWidget`, and
+`registerCommand` is in [`examples/hello-plugin/`](../examples/hello-plugin/).
+
+## Authentication (summary — full reference in `docs/auth-api.md`)
+
+`RaxAuth` is a provider-based extension point, not a built-in auth system —
+RAX Theme ships no login page, no credential storage, and no default
+provider beyond a permissive no-op (`hasPermission()` returns `true` and
+`beforeRoute()` never blocks when no provider is registered, which is the
+state of every page in this repository — this is what keeps adding
+`RaxAuth` to the boot sequence backward compatible). `RaxCore.boot()` calls
+`RaxAuth.beforeRoute(pageId)` before booting the active page module; if a
+registered provider blocks it, `RaxCore` skips that page's `init()` and does
+nothing else — no redirect or access-denied UI, that's the provider's job.
 
 ## Event system (summary — full catalog in `docs/events.md`)
 
-9 distinct event names: `theme:change`, `toast:show`, `modal:open`/
-`modal:close`/`modal:closed`, `search:results`, `registry:change`,
-`nav:change`, `sidebar:toggle`. Zero duplicates. Every `registry:change` emit
-consistently includes an `id` field regardless of which kind of registration
-triggered it.
+12 distinct event names: `theme:change`, `auth:login`, `auth:logout`,
+`auth:change`, `toast:show`, `modal:open`/`modal:close`/`modal:closed`,
+`search:results`, `registry:change`, `nav:change`, `sidebar:toggle`. Zero
+duplicates. Every `registry:change` emit consistently includes an `id`
+field regardless of which kind of registration triggered it.
 
 ## Theme engine (summary — full detail + verification in `docs/theming.md`)
 
