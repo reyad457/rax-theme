@@ -8,9 +8,11 @@ compatibility contract, even if technically reachable.
 A plugin **never** edits a framework file (`core.js`, `registry.js`,
 `navigation.js`, any `components/*.js`, any `components/*.css`). Everything a
 plugin needs is reachable through the `register*` functions below, the
-shared UI components documented in `docs/component-api.md`, and — if the
-host application needs real access control — the auth provider API
-documented in `docs/auth-api.md`.
+plugin manifest/lifecycle/dependency system documented in
+[`plugin-manifest.md`](plugin-manifest.md) and this file's own Plugin
+Manifest/Lifecycle/Validation sections, the shared UI components documented
+in `docs/component-api.md`, and — if the host application needs real access
+control — the auth provider API documented in `docs/auth-api.md`.
 
 ---
 
@@ -41,10 +43,15 @@ the theme. See `plugins/README.md` for the plugin file convention itself.
    plugin-loader, components, services)
 2. RaxNavigation.mount({...}) — reserves the sidebar/topbar DOM, page id is now known
 3. RaxPluginLoader.loadAll()
-     → each plugins/*/index.js runs, calling registerPage/registerMenuItem/
-       registerCommand/registerSearchProvider/registerWidget/registerTheme/
+     → each plugins/*/index.js runs, typically calling
+       RaxPlugins.registerManifest() FIRST (see docs/plugin-manifest.md),
+       then registerPage/registerMenuItem/registerCommand/
+       registerSearchProvider/registerWidget/registerTheme/
        registerSettingsPage/registerNotification/registerPermission/
        RaxAuth.registerProvider
+     → once every script has settled, RaxPluginLoader automatically calls
+       RaxPlugins.validateAll() — checks every registered manifest's
+       dependencies exist (see "Dependency Resolution" below)
 4. RaxCore.boot()
      → RaxTheme.init()            (sees any registerTheme() calls from step 3)
      → mounts ToastStack/ModalHost
@@ -223,6 +230,157 @@ provider is registered) is in [`docs/auth-api.md`](auth-api.md).
 
 ---
 
+## Plugin manifest — `RaxPlugins.registerManifest(manifest, hooks?)`
+
+Every plugin should register a manifest describing what it is. The complete
+field-by-field schema reference, with a full worked example, is in
+[`plugin-manifest.md`](plugin-manifest.md) — this section covers how
+registration fits into the plugin lifecycle.
+
+```js
+RaxPlugins.registerManifest({
+  id: 'backups', name: 'Backups', version: '1.0.0',
+  dependencies: [{ id: 'core-vpn-api', version: '>=1.0.0' }],
+}, {
+  onInstall: function (m) { /* ... */ },
+  onEnable: function (m) { /* ... */ },
+});
+```
+
+Call this **before** any `registerPage`/`registerWidget`/`registerCommand`
+call in your plugin's script — see `plugin-manifest.md`'s "How the manifest
+is loaded" section for why the ordering matters.
+
+## Plugin lifecycle
+
+`registerManifest()`'s second argument is an optional hooks object. All 5
+hooks are optional; a plugin can implement none, some, or all of them:
+
+| Hook | Fires when |
+|---|---|
+| `onInstall(manifest)` | The first time this plugin's `id` has ever been seen in this browser (tracked via `localStorage`) |
+| `onUpdate(manifest, { from, to })` | The persisted version for this `id` differs from the version just registered |
+| `onEnable(manifest)` | Every time the plugin loads and registers while enabled (the default) — **not** a one-time transition, since a buildless static app has no persistent "session" beyond a single page load |
+| `onDisable(manifest)` | Only when `RaxPlugins.disablePlugin(id)` is called explicitly — nothing calls this automatically |
+| `onUninstall(manifest)` | Only when `RaxPlugins.uninstallPlugin(id)` is called explicitly |
+
+**There is no installer and no plugin-manager UI.** These hooks are called
+through the existing `RaxPluginLoader` — "installing" a plugin in RAX Theme
+today means adding its script to `RAX_PLUGINS`; "uninstalling" means removing
+it (calling `RaxPlugins.uninstallPlugin()` only resets tracked lifecycle
+state, it doesn't stop a still-declared script from loading again). Each
+hook call is also paired with a `plugin:*` event (`plugin:installed`,
+`plugin:updated`, `plugin:enabled`, `plugin:disabled`, `plugin:uninstalled`)
+— see `docs/events.md` — so code that isn't the plugin itself can react too.
+
+## Dependency resolution
+
+A plugin declares `dependencies`/`optionalDependencies` in its manifest (see
+`plugin-manifest.md`). **RAX Theme validates that a dependency's plugin id
+has been registered — it never installs, downloads, or fetches anything.**
+There is no package manager here; ordering `RAX_PLUGINS` so dependencies load
+before the plugins that need them is the host application's responsibility.
+
+**Worked example — a plugin requiring another:**
+
+```js
+// plugins/wireguard-plugin/index.js
+RaxPlugins.registerManifest({
+  id: 'wireguard-plugin', name: 'WireGuard', version: '2.1.0',
+  dependencies: [{ id: 'core-vpn-api', version: '>=1.0.0' }],
+});
+```
+
+If `RAX_PLUGINS` is `['plugins/wireguard-plugin/index.js']` — i.e.
+`core-vpn-api` was never declared at all — `RaxPluginLoader.loadAll()`'s
+automatic `RaxPlugins.validateAll()` call logs:
+
+```
+[RaxPlugins] Plugin "wireguard-plugin" depends on "core-vpn-api", which is
+not registered. RAX Theme does not install dependencies automatically —
+make sure "core-vpn-api" is loaded (declared earlier in RAX_PLUGINS) before
+"wireguard-plugin".
+```
+
+**Worked example — an optional dependency:**
+
+```js
+// plugins/grafana-plugin/index.js
+RaxPlugins.registerManifest({
+  id: 'grafana-plugin', name: 'Grafana', version: '1.0.0',
+  optionalDependencies: [{ id: 'notification-api', version: '>=1.0.0' }],
+});
+```
+
+Same situation, but logged as a **warning**, not an error, since the
+dependency is optional — the Grafana plugin is expected to still function,
+just without whatever richer notification integration it would have used.
+
+Both examples are the exact scenarios named in this platform's own design
+brief; `examples/hello-plugin/` demonstrates the optional-dependency warning
+path end to end (open its console — see `examples/hello-plugin/README.md`).
+
+## Plugin validation
+
+`RaxPlugins` checks, and reports on (never blocks on):
+
+- **Manifest schema** — `id`/`name`/`version` required and correctly typed;
+  `dependencies`/`optionalDependencies`/`keywords`/`permissions` must be
+  arrays if present. A schema-invalid manifest is refused (`registerManifest()`
+  returns `false`) since there's nothing coherent to register.
+- **Duplicate plugin IDs** — two `registerManifest()` calls with the same
+  `id`.
+- **Duplicate page/widget/command IDs** — detected by listening to
+  `registry:change` (see `docs/events.md`) and attributing every
+  `registerPage`/`registerWidget`/`registerCommand` call to whichever
+  manifest was most recently registered (or `(built-in)` if none was). If a
+  second plugin — or a plugin and a built-in page — registers the same id,
+  both are named in the error.
+- **Unsupported framework version** — a manifest's `minimumRaxVersion`
+  checked against `RaxCore.VERSION`.
+- **Missing dependencies** — see "Dependency resolution" above.
+
+All errors/warnings are human-readable strings, logged to the console with a
+`[RaxPlugins]` prefix, and queryable after the fact:
+
+```js
+RaxPlugins.getValidationErrors();   // string[]
+RaxPlugins.getValidationWarnings(); // string[]
+```
+
+## Plugin metadata API
+
+```js
+RaxPlugins.getPlugin('wireguard-plugin');
+// -> { id, name, version, ...every manifest field, enabled: true, installedVersion: '2.1.0' } | null
+
+RaxPlugins.getPlugins();
+// -> array of the same shape, for every registered plugin
+
+RaxPlugins.isPluginEnabled('wireguard-plugin'); // -> boolean
+RaxPlugins.getPluginVersion('wireguard-plugin'); // -> '2.1.0' | null
+
+RaxPlugins.enablePlugin('wireguard-plugin');   // fires onEnable, emits plugin:enabled
+RaxPlugins.disablePlugin('wireguard-plugin');  // fires onDisable, emits plugin:disabled
+RaxPlugins.uninstallPlugin('wireguard-plugin'); // fires onUninstall, emits plugin:uninstalled
+```
+
+No UI in RAX Theme calls any of the above today — same "storage/dispatch is
+real, consuming UI is later work" pattern as `registerWidget()` before
+dashboard customization existed. A host application can build its own
+plugin-management surface on top of this API; RAX Theme deliberately ships
+none itself.
+
+## Authentication — `RaxAuth`
+
+RAX Theme has no built-in login page or auth backend. If your host
+application needs real access control, register an auth provider — a
+complete, dedicated guide (interface contract, lifecycle, an illustrative
+example, and the exact backward-compatible default behavior when no
+provider is registered) is in [`docs/auth-api.md`](auth-api.md).
+
+---
+
 ## Shared UI components available to plugins
 
 `RaxComponents.Card`, `.Widget`, `.Modal`, `.Table`, `.Tabs`, `.Toast` are all
@@ -246,3 +404,6 @@ framework-owned singletons; do not mount these yourself.
 - Assume your auth provider is the only one that will ever be registered —
   `RaxAuth` supports exactly one active provider; registering a second
   replaces the first (see `docs/auth-api.md`).
+- Assume a declared `dependencies`/`optionalDependencies` entry will be
+  fetched or installed for you — `RaxPlugins` only validates and reports;
+  see "Dependency resolution" above.

@@ -30,6 +30,7 @@ rax-theme/
 │   ├── project-structure.md      This file
 │   ├── component-api.md          Every RaxComponents.* contract + props shape
 │   ├── plugin-api.md             Extension API reference + lifecycle diagram
+│   ├── plugin-manifest.md        Plugin manifest (manifest.json) schema reference
 │   ├── auth-api.md               Auth provider extension API (no built-in auth)
 │   ├── theming.md                Accent/mode system, registerTheme(), verification results
 │   ├── events.md                 Every framework event: emitter, payload, consumer
@@ -39,7 +40,8 @@ rax-theme/
 │   └── README.md                 Plugin folder convention
 │
 ├── examples/
-│   └── hello-plugin/              Worked example: registerPage + registerWidget + registerCommand
+│   └── hello-plugin/              Worked example: manifest.json + lifecycle hooks +
+│                                    dependency declarations + registerPage/Widget/Command
 │
 ├── dashboard.html                5 built-in console pages. Each is self-contained:
 ├── interfaces.html                own <head> (fonts, Lucide, Chart.js only if charted),
@@ -103,7 +105,8 @@ rax-theme/
 
 | I want to add | Where |
 |---|---|
-| A new page, menu item, command, search behavior, widget, or theme | A plugin in `plugins/<name>/` — see `docs/plugin-api.md` and the worked example in `examples/hello-plugin/`. Not a framework file. |
+| A new page, menu item, command, search behavior, widget, theme, settings page, notification, or permission | A plugin in `plugins/<name>/` — see `docs/plugin-api.md` and the worked example in `examples/hello-plugin/`. Not a framework file. |
+| A plugin `manifest.json` | See `docs/plugin-manifest.md` for the schema, and `examples/hello-plugin/manifest.json` for a worked example. |
 | A new reusable UI component | `assets/js/components/<name>.js` + `assets/css/components/<name>.css`, following the `mount/update/destroy` contract — see `docs/component-api.md`. |
 | A new design token | `assets/css/variables.css` (if it's a genuinely new primitive) or `assets/css/theme.css` (if it's a new semantic role built from existing primitives). Never invent a raw value inside a component file. |
 | A new framework event | Document it in `docs/events.md` first, following the `noun:verb` convention, then implement the emit/listen pair. |

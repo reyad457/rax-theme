@@ -12,6 +12,7 @@ your question and what order to read them in if you're starting from zero.
 | Evaluating RAX Theme for the first time | The main [`README.md`](../README.md), then come back here |
 | Setting up a development environment / opening your first PR | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — it links back into this folder where relevant |
 | Building a plugin | [`plugin-api.md`](plugin-api.md), then the worked example in [`../examples/hello-plugin/`](../examples/hello-plugin/) |
+| Writing a plugin's `manifest.json` | [`plugin-manifest.md`](plugin-manifest.md) — every field explained, with examples |
 | Adding real access control (login, permissions) to a host application | [`auth-api.md`](auth-api.md) — RAX Theme ships no auth backend itself, only the extension point |
 | Building a new reusable UI component | [`component-api.md`](component-api.md) |
 | Trying to understand *why* the code is structured this way | [`architecture.md`](architecture.md), then [`architecture-diagram.md`](architecture-diagram.md) if you want the visual version |
@@ -32,13 +33,16 @@ your question and what order to read them in if you're starting from zero.
 4. [`events.md`](events.md) — the complete list of framework events, what
    fires them, and what (if anything) listens.
 5. [`plugin-api.md`](plugin-api.md) — how everything above comes together
-   into the Extension API, plus the plugin loading lifecycle.
-6. [`auth-api.md`](auth-api.md) — the auth provider extension point, if your
+   into the Extension API, plus the plugin loading lifecycle, plugin
+   lifecycle hooks, dependency resolution, and validation.
+6. [`plugin-manifest.md`](plugin-manifest.md) — the manifest schema every
+   plugin should ship, field by field.
+7. [`auth-api.md`](auth-api.md) — the auth provider extension point, if your
    host application needs real access control (RAX Theme itself ships none).
-7. [`api-classification.md`](api-classification.md) — the reference table:
+8. [`api-classification.md`](api-classification.md) — the reference table:
    every exported function, classified Public/Internal/Private, with the
    reasoning for each classification.
-8. [`project-structure.md`](project-structure.md) — keep this open as a
+9. [`project-structure.md`](project-structure.md) — keep this open as a
    reference while you work; it's not meant to be read start-to-finish.
 
 ## What each file covers, in one line
@@ -56,8 +60,13 @@ your question and what order to read them in if you're starting from zero.
   shape, with a live-instance count and notes on what each component is and
   isn't a fit for.
 - **`plugin-api.md`** — the `register*` Extension API functions, the
-  full plugin loading lifecycle (with a diagram), and what plugins must not
-  do.
+  full plugin loading lifecycle (with a diagram), plugin lifecycle hooks,
+  dependency resolution, plugin validation, the plugin metadata API, and
+  what plugins must not do.
+- **`plugin-manifest.md`** — the `manifest.json` schema every plugin should
+  ship: every field explained, a minimal and a complete example, the
+  minimal semver comparator's exact behavior, and why the framework reads
+  the manifest as a JS object rather than fetching the JSON file directly.
 - **`auth-api.md`** — the provider-based auth extension API
   (`currentUser`/`login`/`logout`/`hasPermission`/`beforeRoute`/
   `afterLogin`/`afterLogout`), the permissive-by-default behavior when no

@@ -6,10 +6,10 @@ This document describes the system as it currently stands: the layered CSS
 token system, the framework's core JavaScript modules, the boot sequence,
 and the design decisions behind each. For deep dives on specific subsystems,
 see the companion docs in this folder: `component-api.md`, `plugin-api.md`,
-`auth-api.md`, `theming.md`, `events.md`, `api-classification.md`,
-`project-structure.md` (file-by-file guide), and `architecture-diagram.md`
-(the same architecture as Mermaid diagrams). Start with `docs/README.md` if
-this is your first time in this folder.
+`plugin-manifest.md`, `auth-api.md`, `theming.md`, `events.md`,
+`api-classification.md`, `project-structure.md` (file-by-file guide), and
+`architecture-diagram.md` (the same architecture as Mermaid diagrams).
+Start with `docs/README.md` if this is your first time in this folder.
 
 ---
 
@@ -23,6 +23,7 @@ rax-theme/
 │   ├── architecture.md          (this file)
 │   ├── component-api.md
 │   ├── plugin-api.md
+│   ├── plugin-manifest.md
 │   ├── auth-api.md
 │   ├── theming.md
 │   ├── events.md
@@ -30,7 +31,8 @@ rax-theme/
 ├── plugins/
 │   └── README.md                 (convention doc)
 ├── examples/
-│   └── hello-plugin/              (worked Extension API example)
+│   └── hello-plugin/              (worked Extension API + plugin platform example,
+│                                  includes manifest.json)
 ├── dashboard.html, interfaces.html, vpn.html, suricata.html, logs.html
 └── assets/
     ├── css/
@@ -49,6 +51,7 @@ rax-theme/
         ├── utils.js                  RaxUtils — shared helpers, incl. hexToRgba/readCssVar
         ├── theme.js                    RaxTheme — mode/accent manager + registerTheme()
         ├── auth.js                      RaxAuth — provider-based auth extension point (no built-in auth)
+        ├── plugins.js                    RaxPlugins — plugin manifests, lifecycle hooks, dependency validation
         ├── plugin-loader.js              RaxPluginLoader — loads plugins/*/index.js before boot()
         ├── charts.js                      RaxCharts — sole Chart.js caller, with live dataset re-coloring
         ├── notifications.js                RaxNotifications — toast() API
@@ -114,7 +117,7 @@ at the cost of not getting tree-shaking or minification for free. See
 order across every HTML file):
 
 ```
-events → registry → utils → theme → auth → plugin-loader → components/*
+events → registry → utils → theme → auth → plugins → plugin-loader → components/*
   → charts → notifications → search → command-palette
   → navigation → menu-config → commands-config → core
   → pages/<this-page>.js
@@ -145,6 +148,22 @@ that concern rather than centralized into one god-object registry:
 
 A worked example using `registerPage`, `registerWidget`, and
 `registerCommand` is in [`examples/hello-plugin/`](../examples/hello-plugin/).
+
+## Plugin platform (summary — full reference in `docs/plugin-manifest.md` and `docs/plugin-api.md`)
+
+Every plugin should ship a `manifest.json` (`id`, `name`, `version`
+required; `description`/`author`/`license`/`homepage`/`icon`/`category`/
+`keywords`/`minimumRaxVersion`/`permissions`/`dependencies`/
+`optionalDependencies` optional) and pass the identical data to
+`RaxPlugins.registerManifest()` at runtime — never fetched directly, since
+the framework never calls `fetch()` (see "no raw fetch" design principle
+below). `RaxPlugins` dispatches 5 lifecycle hooks
+(`onInstall`/`onEnable`/`onDisable`/`onUpdate`/`onUninstall`) through the
+existing `RaxPluginLoader`, validates declared dependencies exist (report
+only — dependencies are never auto-installed), detects duplicate plugin/
+page/widget/command IDs across plugins, and exposes a read-only metadata API
+(`getPlugin`/`getPlugins`/`isPluginEnabled`/`getPluginVersion`). There is no
+plugin-manager UI, no installer, and no networking anywhere in this layer.
 
 ## Authentication (summary — full reference in `docs/auth-api.md`)
 
@@ -198,3 +217,9 @@ Topbar: framework singletons, one each) — none are dormant.
    given environment (e.g. SRI hash generation requires network access to
    the CDN origins), that limitation is stated plainly rather than papered
    over — see `ROADMAP.md` and `SECURITY.md`.
+5. **No `fetch()`/`XMLHttpRequest` anywhere in the framework.** This is what
+   keeps every page working when opened directly via `file://` (see
+   `README.md`'s Browser Support section). It's also why plugin manifests
+   are passed to `RaxPlugins.registerManifest()` as JS objects rather than
+   read from `manifest.json` directly at runtime — see
+   `docs/plugin-manifest.md`.

@@ -61,6 +61,50 @@ notifications, matching the Modal pair.
   itself based on the current permission set would listen here rather than
   duplicating listeners on both `auth:login` and `auth:logout`.
 
+## `plugin:installed`
+
+- **Emitted by:** `plugins.js`, from `RaxPlugins.registerManifest()`, the
+  first time a given plugin `id` is seen in this browser.
+- **Payload:** `{ id: string, manifest: object }`
+- **Consumed by:** nothing in the built-in framework today.
+- **Status:** available for plugin use — paired 1:1 with the `onInstall`
+  lifecycle hook (see `docs/plugin-api.md`); use whichever fits your plugin
+  better (the hook if you're the plugin installing, this event if you're a
+  *different* plugin that wants to react to installs generally).
+
+## `plugin:updated`
+
+- **Emitted by:** `plugins.js`, from `RaxPlugins.registerManifest()`, when
+  the persisted version for a plugin `id` differs from the version just
+  registered.
+- **Payload:** `{ id: string, manifest: object, from: string, to: string }`
+- **Consumed by:** nothing in the built-in framework today.
+- **Status:** available for plugin use, paired with the `onUpdate` hook.
+
+## `plugin:enabled`
+
+- **Emitted by:** `plugins.js`, from `RaxPlugins.registerManifest()`
+  (whenever the plugin loads while enabled) and from
+  `RaxPlugins.enablePlugin()`.
+- **Payload:** `{ id: string, manifest: object }`
+- **Consumed by:** nothing in the built-in framework today.
+- **Status:** available for plugin use, paired with the `onEnable` hook.
+
+## `plugin:disabled`
+
+- **Emitted by:** `plugins.js`, from `RaxPlugins.disablePlugin()` only —
+  nothing emits this automatically.
+- **Payload:** `{ id: string, manifest: object }`
+- **Consumed by:** nothing in the built-in framework today.
+- **Status:** available for plugin use, paired with the `onDisable` hook.
+
+## `plugin:uninstalled`
+
+- **Emitted by:** `plugins.js`, from `RaxPlugins.uninstallPlugin()` only.
+- **Payload:** `{ id: string, manifest: object }`
+- **Consumed by:** nothing in the built-in framework today.
+- **Status:** available for plugin use, paired with the `onUninstall` hook.
+
 ## `toast:show`
 
 - **Emitted by:** `notifications.js`, from `RaxNotifications.toast()`.
@@ -152,10 +196,12 @@ names, not a duplicate of the same event.)
 
 ## Dead events found
 
-Six events are emitted with zero built-in listeners (`modal:closed`,
-`nav:change`, `sidebar:toggle`, `auth:login`, `auth:logout`, `auth:change`),
-and one is listened for with zero built-in emitters (`modal:close`,
-`modal:open` — both intentionally plugin-triggered). None were removed:
+Eleven events are emitted with zero built-in listeners (`modal:closed`,
+`nav:change`, `sidebar:toggle`, `auth:login`, `auth:logout`, `auth:change`,
+`plugin:installed`, `plugin:updated`, `plugin:enabled`, `plugin:disabled`,
+`plugin:uninstalled`), and one is listened for with zero built-in emitters
+(`modal:close`, `modal:open` — both intentionally plugin-triggered). None
+were removed:
 
 - Removing them would be indistinguishable from a breaking API change for any
   future plugin relying on the framework doing exactly what's documented here.
@@ -164,6 +210,8 @@ and one is listened for with zero built-in emitters (`modal:close`,
   `registerCommand()` before something in the app started exercising them —
   "unexercised" and "dead" are treated as different things throughout this
   project, and are called out explicitly rather than left for someone to
-  rediscover. The 3 `auth:*` events are unexercised for the same reason
-  `RaxAuth` itself is: this repository ships zero auth providers by design
-  (see `docs/auth-api.md`) — there is nothing to listen for yet, on purpose.
+  rediscover. The `auth:*` and `plugin:*` events are unexercised for the
+  same reason `RaxAuth`/`RaxPlugins` themselves are: this repository ships
+  zero auth providers and no plugin-management UI by design (see
+  `docs/auth-api.md` and `docs/plugin-api.md`) — there is nothing built-in
+  to listen for these yet, on purpose.

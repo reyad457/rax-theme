@@ -1,0 +1,18 @@
+{
+  "id": "hello-plugin",
+  "name": "Hello Plugin",
+  "description": "A minimal, runnable example of the RAX Theme Extension API and plugin platform.",
+  "version": "1.0.0",
+  "author": "RAX Theme Contributors",
+  "license": "MIT",
+  "homepage": "https://github.com/<org>/rax-theme/tree/main/examples/hello-plugin",
+  "icon": "puzzle",
+  "category": "example",
+  "keywords": ["example", "extension-api", "starter"],
+  "minimumRaxVersion": "1.0.0",
+  "permissions": [],
+  "dependencies": [],
+  "optionalDependencies": [
+    { "id": "core-vpn-api", "version": ">=1.0.0" }
+  ]
+}

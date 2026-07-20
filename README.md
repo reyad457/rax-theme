@@ -57,6 +57,10 @@ Reusable UI pieces (`Card`, `Widget`, `Table`...) are properties on a shared
 - **Documented Extension API** — register pages, menu items, widgets,
   commands, search providers, themes, settings pages, notifications, and
   permissions, without editing a single framework file
+- **Plugin platform** — every plugin can ship a manifest (`id`/`name`/
+  `version`, dependencies on other plugins, and more), gets 5 lifecycle
+  hooks called through the existing loader, and has its dependencies
+  validated — checked and reported, never auto-installed
 - **Provider-based auth extension point** — plug in any authentication
   system (or none); RAX Theme ships no login page, no backend, and no
   access control until a host application registers a provider
@@ -113,6 +117,7 @@ rax-theme/
 │   ├── project-structure.md       annotated file-by-file folder guide
 │   ├── component-api.md           every RaxComponents.* contract
 │   ├── plugin-api.md              the Extension API + lifecycle
+│   ├── plugin-manifest.md         the plugin manifest (manifest.json) schema
 │   ├── auth-api.md                auth provider extension API (no built-in auth)
 │   ├── theming.md                 accent/mode system + registerTheme()
 │   ├── events.md                  the full framework event catalog
@@ -120,7 +125,9 @@ rax-theme/
 ├── plugins/
 │   └── README.md                  plugin folder convention
 ├── examples/
-│   └── hello-plugin/               worked Extension API example
+│   └── hello-plugin/               worked example: manifest.json, lifecycle
+│                                    hooks, dependency declarations, and the
+│                                    core Extension API
 ├── dashboard.html, interfaces.html, vpn.html, suricata.html, logs.html
 └── assets/
     ├── css/                       variables, theme, layout, utilities,
@@ -195,12 +202,25 @@ lifecycle contract: [`docs/theming.md`](docs/theming.md).
 
 A plugin is a plain script that registers itself through the public
 [Extension API](docs/plugin-api.md) — pages, menu items, commands, search
-providers, widgets, and themes — without ever editing a framework file:
+providers, widgets, themes, settings pages, notifications, and permissions —
+without ever editing a framework file. Plugins can also ship a
+[manifest](docs/plugin-manifest.md) (`id`/`name`/`version`, plus optional
+metadata and declared dependencies on other plugins) and hook into 5
+lifecycle events:
 
 ```js
 // plugins/my-plugin/index.js
 (function (global) {
   'use strict';
+
+  global.RaxPlugins.registerManifest({
+    id: 'my-plugin', name: 'My Plugin', version: '1.0.0',
+    dependencies: [{ id: 'core-vpn-api', version: '>=1.0.0' }],
+  }, {
+    onInstall: function (m) { /* first time seen in this browser */ },
+    onEnable: function (m) { /* fires every load while enabled */ },
+  });
+
   global.RaxRegistry.registerPage({ id: 'my-plugin', title: 'My Plugin', init: init, destroy: function () {} });
   global.RaxRegistry.registerMenuItem({ pageId: 'my-plugin', href: 'my-plugin.html', icon: 'puzzle', label: 'My Plugin', section: 'Plugins' });
   function init() { /* ... */ }
@@ -212,12 +232,15 @@ providers, widgets, and themes — without ever editing a framework file:
 <script>window.RAX_PLUGINS = ['plugins/my-plugin/index.js'];</script>
 ```
 
-`RaxPluginLoader` loads every declared plugin before `RaxCore.boot()` runs, so
-registrations are always in place before the sidebar renders and the active
-page module boots. A complete, runnable example using `registerPage`,
-`registerWidget`, and `registerCommand` is in
-[`examples/hello-plugin/`](examples/hello-plugin/). Full reference, including
-the complete lifecycle diagram: [`docs/plugin-api.md`](docs/plugin-api.md).
+`RaxPluginLoader` loads every declared plugin before `RaxCore.boot()` runs,
+and automatically validates every declared dependency exists once loading
+finishes — dependencies are **checked and reported, never installed**; there
+is no installer, no plugin-manager UI, and no networking anywhere in this
+layer. A complete, runnable example — manifest, all 5 lifecycle hooks, a
+dependency declaration, plus `registerPage`/`registerWidget`/
+`registerCommand` — is in [`examples/hello-plugin/`](examples/hello-plugin/).
+Full reference: [`docs/plugin-api.md`](docs/plugin-api.md) and
+[`docs/plugin-manifest.md`](docs/plugin-manifest.md).
 
 ## Authentication
 
@@ -280,6 +303,8 @@ something:
   exported function, classified Public/Internal/Private, with why.
 - [`docs/plugin-api.md`](docs/plugin-api.md) — the complete Extension API
   reference and plugin lifecycle.
+- [`docs/plugin-manifest.md`](docs/plugin-manifest.md) — the plugin
+  manifest schema, field by field.
 - [`docs/auth-api.md`](docs/auth-api.md) — the auth provider extension API.
 - [`docs/component-api.md`](docs/component-api.md) — every `RaxComponents.*`
   contract and `props` shape.

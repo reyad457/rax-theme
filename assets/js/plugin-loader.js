@@ -10,27 +10,46 @@
  *                 (same loading model as every framework module — no
  *                 bundler, no module resolution, works from a plain
  *                 file:// or static host, matching this project's
- *                 zero-build-step constraint).
+ *                 zero-build-step constraint). Once every declared
+ *                 plugin has finished loading (and, in the process,
+ *                 called RaxPlugins.registerManifest() if it has a
+ *                 manifest), automatically runs dependency validation
+ *                 — see "Automatic validation" below.
  * Public API:     RaxPluginLoader.load(src) -> Promise
  *                 RaxPluginLoader.loadAll(list?) -> Promise
  *                     list defaults to window.RAX_PLUGINS (an array of
  *                     script URLs a page may declare before this
  *                     script runs; defaults to [] if undeclared).
- * Dependencies:   none — deliberately has zero dependency on registry.js/
- *                 theme.js/etc. so it can load early and doesn't care
- *                 what a plugin does once loaded.
+ * Dependencies:   none required — deliberately has zero hard dependency
+ *                 on registry.js/theme.js/etc. so it can load early and
+ *                 doesn't care what a plugin does once loaded.
+ *                 RaxPlugins is used if present (see below) but its
+ *                 absence is handled gracefully.
  * ------------------------------------------------------------------
  * LIFECYCLE CONTRACT: every page's bootstrap script calls
  *   RaxPluginLoader.loadAll().then(function () { RaxCore.boot(); });
  * instead of calling RaxCore.boot() directly. This guarantees every
  * plugin's registerPage/registerMenuItem/registerCommand/
- * registerSearchProvider/registerTheme call has already run BEFORE
- * RaxCore.boot() reads the registry to render the sidebar, boot the
- * page module, and apply the theme — see docs/plugin-api.md for the
- * full lifecycle diagram. window.RAX_PLUGINS defaults to an empty
- * array on every built-in RAX Theme page, so this adds an async tick
- * but changes no visible behavior when no plugins are declared
- * (Phase E objective 9: preserve compatibility).
+ * registerSearchProvider/registerTheme/registerManifest call has
+ * already run BEFORE RaxCore.boot() reads the registry to render the
+ * sidebar, boot the page module, and apply the theme — see
+ * docs/plugin-api.md for the full lifecycle diagram. window.RAX_PLUGINS
+ * defaults to an empty array on every built-in RAX Theme page, so this
+ * adds an async tick but changes no visible behavior when no plugins
+ * are declared.
+ * ------------------------------------------------------------------
+ * AUTOMATIC VALIDATION: after every script in the list has resolved
+ * (loaded or failed — a failed plugin never blocks the others), this
+ * module calls `RaxPlugins.validateAll()` if `RaxPlugins` is loaded,
+ * which checks every registered manifest's declared dependencies exist
+ * and logs any problems (see docs/plugin-manifest.md and
+ * docs/plugin-api.md). This is deliberately wired here rather than in
+ * each page's own bootstrap script, so a page author never needs to
+ * remember to call it — same reasoning as RaxAuth.beforeRoute() being
+ * wired into RaxCore.boot() rather than left for each page to call.
+ * If RaxPlugins isn't loaded on a given page (e.g. a minimal custom
+ * page that doesn't need the plugin platform), this is a silent no-op
+ * — backward compatible with any page that predates plugins.js.
  */
 (function (global) {
   'use strict';
@@ -59,7 +78,9 @@
       return chain.then(function () { return load(src); }).catch(function (err) {
         console.error(err);
       });
-    }, Promise.resolve());
+    }, Promise.resolve()).then(function () {
+      if (global.RaxPlugins) global.RaxPlugins.validateAll();
+    });
   }
 
   global.RaxPluginLoader = { load: load, loadAll: loadAll };

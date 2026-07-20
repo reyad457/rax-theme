@@ -92,13 +92,24 @@ design (it's the entire communication mechanism).
 | Export | Classification | Notes |
 |---|---|---|
 | `boot()` | **Public (page-author-facing)** | Every page calls this exactly once, after `RaxPluginLoader.loadAll()` resolves. |
+| `VERSION` | **Public** | The framework version string. Read by `RaxPlugins` for `minimumRaxVersion` checks; safe for a plugin to read directly too. |
 
 ## RaxPluginLoader (`plugin-loader.js`)
 
 | Export | Classification | Notes |
 |---|---|---|
 | `load(src)` | **Public** | Loads a single script, returns a Promise. |
-| `loadAll(list?)` | **Public (page-author-facing)** | What every page's bootstrap actually calls; `list` defaults to `window.RAX_PLUGINS`. |
+| `loadAll(list?)` | **Public (page-author-facing)** | What every page's bootstrap actually calls; `list` defaults to `window.RAX_PLUGINS`. Also automatically triggers `RaxPlugins.validateAll()` once every script settles, if `RaxPlugins` is loaded. |
+
+## RaxPlugins (`plugins.js`)
+
+| Export | Classification | Notes |
+|---|---|---|
+| `registerManifest(manifest, hooks?)` | **Public** | The plugin platform's entry point — see `docs/plugin-manifest.md` and `docs/plugin-api.md`. |
+| `enablePlugin(id)`, `disablePlugin(id)`, `uninstallPlugin(id)` | **Public** | The only way `onEnable`(re-fire)/`onDisable`/`onUninstall` fire outside of the automatic load-time dispatch — see `docs/plugin-api.md`'s Plugin Lifecycle section. |
+| `getPlugin(id)`, `getPlugins()`, `isPluginEnabled(id)`, `getPluginVersion(id)` | **Public** | The Plugin Metadata API. Read-only; safe for a plugin or a future host-application UI to call freely. |
+| `validateAll()` | **Public** | Normally called automatically by `RaxPluginLoader.loadAll()` — exposed publicly in case a host application wants to re-run validation later (e.g. after dynamically enabling a plugin). |
+| `getValidationErrors()`, `getValidationWarnings()` | **Public** | Read the accumulated validation log as human-readable strings. |
 
 ## RaxUtils (`utils.js`)
 

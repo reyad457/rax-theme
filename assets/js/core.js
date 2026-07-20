@@ -17,6 +17,11 @@
  * Public API:     RaxCore.boot() -- called once, at the bottom of
  *                     every page, after all framework scripts and the
  *                     page's own pages/*.js have loaded.
+ *                 RaxCore.VERSION -- the framework version string,
+ *                     used by RaxPlugins for minimumRaxVersion checks
+ *                     (see docs/plugin-manifest.md). Report-only: an
+ *                     unsatisfied minimumRaxVersion is logged as a
+ *                     validation error, never enforced/blocked.
  * Dependencies:   RaxEvents, RaxRegistry, RaxTheme, RaxAuth,
  *                     RaxComponents.Toast, RaxComponents.Modal, RaxUtils
  * ------------------------------------------------------------------
@@ -123,5 +128,5 @@
     });
   }
 
-  global.RaxCore = { boot: boot };
+  global.RaxCore = { boot: boot, VERSION: '1.0.0-rc' };
 })(window);

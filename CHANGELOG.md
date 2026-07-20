@@ -5,6 +5,57 @@ loosely follows [Keep a Changelog](https://keepachangelog.com/); this project
 is pre-1.0, so early entries are grouped by development stage rather than by
 semantic version until the `v1.0.0` tag.
 
+## [Unreleased] — Plugin Platform
+
+### Added
+- `RaxPlugins` (`assets/js/plugins.js`) — the plugin manifest, lifecycle,
+  and dependency layer:
+  - `registerManifest(manifest, hooks?)` — validates a manifest's schema
+    (`id`/`name`/`version` required; typed checks on the rest), tracks
+    duplicate plugin IDs, checks `minimumRaxVersion` against the new
+    `RaxCore.VERSION`, and dispatches `onInstall`/`onEnable`/`onUpdate`
+    lifecycle hooks based on state persisted in `localStorage`.
+  - `enablePlugin(id)`/`disablePlugin(id)`/`uninstallPlugin(id)` — the only
+    way `onDisable`/`onUninstall` (and a re-fired `onEnable`) trigger, since
+    there's no automatic UI-driven trigger for "the user disabled this."
+  - `getPlugin(id)`/`getPlugins()`/`isPluginEnabled(id)`/`getPluginVersion(id)`
+    — the Plugin Metadata API.
+  - Duplicate page/widget/command ID detection across plugins (and against
+    built-in pages), via a `registry:change` listener that attributes every
+    registration to whichever manifest was most recently registered.
+  - `validateAll()` — checks every registered manifest's
+    `dependencies`/`optionalDependencies` exist; missing required
+    dependencies log as errors, missing optional ones as warnings. Never
+    installs, downloads, or fetches anything. Called automatically by
+    `RaxPluginLoader.loadAll()` once every declared plugin script has
+    settled.
+  - `getValidationErrors()`/`getValidationWarnings()` — the accumulated,
+    human-readable validation log.
+- `RaxCore.VERSION` — a small additive constant (`'1.0.0-rc'`), read by
+  `RaxPlugins` for `minimumRaxVersion` checks.
+- `RaxRegistry.registerSettingsPage()`/`registerNotification()`/
+  `registerPermission()` — extended alongside the plugin platform work (see
+  the Auth Extension API entry below for when these were first added).
+- 5 new `plugin:*` events (`installed`/`updated`/`enabled`/`disabled`/
+  `uninstalled`), paired 1:1 with the lifecycle hooks — see `docs/events.md`.
+- `docs/plugin-manifest.md` — the complete manifest schema reference.
+- `examples/hello-plugin/manifest.json` and updated `index.js` — now
+  demonstrates `registerManifest()`, all 5 lifecycle hooks, and an optional
+  dependency declaration (on a deliberately-unregistered plugin id, to show
+  the missing-dependency warning path without installing anything).
+
+### Changed
+- `assets/js/plugin-loader.js`: `loadAll()` now calls
+  `RaxPlugins.validateAll()` automatically once every plugin script has
+  settled, if `RaxPlugins` is loaded. No-op and fully backward compatible
+  if it isn't.
+- `docs/plugin-api.md`, `docs/api-classification.md`, `docs/events.md`,
+  `docs/architecture.md`, `docs/README.md`, `README.md` all updated.
+
+### Explicitly not built (per this stage's own scope)
+- No plugin-manager UI, no installer, no package downloads, no networking
+  anywhere in this layer. Dependency resolution is report-only.
+
 ## [Unreleased] — Auth Extension API & Expanded Plugin Registry
 
 ### Added
