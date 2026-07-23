@@ -27,6 +27,13 @@
   and has its declared dependencies validated — checked and reported, never
   auto-installed. No plugin-manager UI, installer, or networking — see
   `docs/plugin-manifest.md` and `docs/plugin-api.md`.
+- ✅ **Framework API stabilization** — every export classified Public/
+  Internal/Experimental (`RaxAPI`), a real deprecation system with
+  replacement/removal-version metadata, a framework API version
+  independent of the release version (checked via a plugin manifest's new
+  `apiVersion` field), and an opt-in, zero-overhead-when-disabled Developer
+  Mode reporting deprecated-API usage and load/lifecycle timing — see
+  `docs/versioning.md`, `docs/public-api.md`, `docs/internal-api.md`.
 - ✅ **Example plugin** — [`examples/hello-plugin/`](examples/hello-plugin/)
   demonstrates `registerPage`, `registerWidget`, and `registerCommand` end to
   end.
@@ -41,6 +48,15 @@
   (duplicate-CSS grep, `new Chart(` isolation check, accessibility marker
   checks, asset-reference resolution, JS syntax check) are currently run
   manually. These should become an actual CI job that runs on every PR.
+- **A first real deprecation.** `RaxAPI.deprecate()` is implemented and
+  tested, but nothing has actually been deprecated yet — there was no
+  genuine candidate when the system was built. Whenever the first Public
+  API export genuinely needs to change, this is the mechanism to use.
+- **A first Experimental-tier export.** The Public/Internal/Experimental
+  three-tier system (`docs/versioning.md`) currently has zero Experimental
+  entries — every export is either stable enough to be Public or clearly
+  internal. The tier is ready for the first component/API shipped ahead of
+  its final shape settling.
 - **Automated visual regression testing.** This project's "no visual
   regression" claims have been verified by identical class names + identical
   token values + manual review, never a real screenshot diff.

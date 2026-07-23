@@ -10,6 +10,17 @@ show it was reviewed, not forgotten).
 Reviewed by reading every `global.Rax* = {...}` export statement in
 `assets/js/` and every `RaxComponents.* = {...}` registration.
 
+**This is the detailed ledger — the reasoning behind every classification.**
+For a shorter, curated reading experience, see
+[`public-api.md`](public-api.md) (everything safe to build against) and
+[`internal-api.md`](internal-api.md) (everything that isn't, and why). All
+three documents describe the same underlying data — `RaxAPI`'s runtime
+classification table (`assets/js/api.js`) — and must never disagree; if you
+find a discrepancy, that's a bug in whichever file is wrong. See
+[`versioning.md`](versioning.md) for the compatibility guarantee the Public
+tier carries, and the deprecation system that governs how a Public export
+is ever changed or removed.
+
 ---
 
 ## RaxEvents (`events.js`)
@@ -110,6 +121,22 @@ design (it's the entire communication mechanism).
 | `getPlugin(id)`, `getPlugins()`, `isPluginEnabled(id)`, `getPluginVersion(id)` | **Public** | The Plugin Metadata API. Read-only; safe for a plugin or a future host-application UI to call freely. |
 | `validateAll()` | **Public** | Normally called automatically by `RaxPluginLoader.loadAll()` — exposed publicly in case a host application wants to re-run validation later (e.g. after dynamically enabling a plugin). |
 | `getValidationErrors()`, `getValidationWarnings()` | **Public** | Read the accumulated validation log as human-readable strings. |
+
+## RaxAPI (`api.js`)
+
+| Export | Classification | Notes |
+|---|---|---|
+| `VERSION`, `MIN_SUPPORTED_VERSION` | **Public** | The framework API version constants — see `docs/versioning.md` for how these differ from `RaxCore.VERSION`. |
+| `classify(moduleName, exportName, tier)`, `getClassification(...)`, `getSurface(tier?)` | **Public** | The runtime classification registry this very document's Public/Internal split is drawn from. |
+| `deprecate(name, info)`, `warnDeprecated(name)`, `isDeprecated(name)`, `getDeprecations()` | **Public** | The deprecation system — see `docs/versioning.md`. `warnDeprecated()` is a no-op unless `RaxDevMode` is enabled, by design. |
+| `checkPluginCompatibility(manifest)` | **Public** | Also called automatically by `RaxPlugins.registerManifest()` — exposed publicly in case a host application wants to re-check a manifest later. |
+
+## RaxDevMode (`dev-mode.js`)
+
+| Export | Classification | Notes |
+|---|---|---|
+| `isEnabled()`, `enable()`, `disable()`, `report()` | **Public** | The developer-facing controls — see `docs/versioning.md`. |
+| `reportDeprecatedUsage()`, `recordPluginLoadTiming()`, `recordLifecycleTiming()`, and their `get*` accessors | **Public** | Normally called by the framework itself (`RaxAPI`, `RaxPlugins`, `RaxPluginLoader`), not by a plugin — but not restricted from plugin use either, e.g. a plugin could record its own custom timing into the same report. |
 
 ## RaxUtils (`utils.js`)
 

@@ -28,7 +28,12 @@
  * Dependencies:   events.js, registry.js (listens to 'registry:change'
  *                 to attribute page/widget/command IDs to the plugin
  *                 that registered them), RaxCore.VERSION (for
- *                 minimumRaxVersion checks)
+ *                 minimumRaxVersion checks). Soft dependencies (used
+ *                 if present, never required): RaxAPI (for
+ *                 apiVersion compatibility checks, folded into this
+ *                 module's own validation log — see
+ *                 docs/versioning.md) and RaxDevMode (lifecycle hook
+ *                 timing, zero cost when disabled or absent).
  * Extension:      This IS the plugin platform layer — see
  *                 docs/plugin-manifest.md (the manifest schema) and
  *                 docs/plugin-api.md (lifecycle + dependency
@@ -215,6 +220,24 @@
     idOwnership[evt.type][evt.id] = newOwner;
   });
 
+  function devModeOn() {
+    return !!(global.RaxDevMode && global.RaxDevMode.isEnabled());
+  }
+
+  /** Calls hooks[hookName](...) if defined, timing it via RaxDevMode when
+   * dev mode is enabled. Checks devModeOn() before touching Date.now() at
+   * all, so a disabled page pays zero cost for this wrapper. */
+  function runHook(id, hookName, hooks, args) {
+    if (!hooks || typeof hooks[hookName] !== 'function') return;
+    if (!devModeOn()) {
+      hooks[hookName].apply(null, args);
+      return;
+    }
+    var start = Date.now();
+    hooks[hookName].apply(null, args);
+    global.RaxDevMode.recordLifecycleTiming(id, hookName, Date.now() - start);
+  }
+
   function registerManifest(manifest, hooks) {
     var schemaErrors = validateManifestSchema(manifest);
     if (schemaErrors.length) {
@@ -235,6 +258,22 @@
       }
     }
 
+    // API-version compatibility check (see docs/versioning.md) — soft
+    // dependency on RaxAPI, same pattern as the RaxCore.VERSION check
+    // above. Issues are folded into this module's own validation log so
+    // getValidationErrors()/getValidationWarnings() stay the one place a
+    // developer checks, rather than fragmenting across two query APIs.
+    if (global.RaxAPI) {
+      var compat = global.RaxAPI.checkPluginCompatibility(manifest);
+      compat.issues.forEach(function (issue) {
+        if (issue.level === 'error') log('error', issue.message);
+        else if (issue.level === 'warning') log('warning', issue.message);
+        // 'info' level issues (e.g. "no apiVersion declared") are not
+        // logged as errors/warnings — see docs/versioning.md for why an
+        // undeclared apiVersion is treated as informational, not a problem.
+      });
+    }
+
     manifests[id] = manifest;
     hookRegistry[id] = hooks || {};
     currentPluginId = id;
@@ -245,20 +284,20 @@
     var isEnabled = enabledMap[id] !== false;
 
     if (!wasInstalled) {
-      if (hooks && typeof hooks.onInstall === 'function') hooks.onInstall(manifest);
+      runHook(id, 'onInstall', hooks, [manifest]);
       installed[id] = manifest.version;
       writeMap(INSTALLED_KEY, installed);
       emit('plugin:installed', { id: id, manifest: manifest });
     } else if (installed[id] !== manifest.version) {
       var from = installed[id];
-      if (hooks && typeof hooks.onUpdate === 'function') hooks.onUpdate(manifest, { from: from, to: manifest.version });
+      runHook(id, 'onUpdate', hooks, [manifest, { from: from, to: manifest.version }]);
       installed[id] = manifest.version;
       writeMap(INSTALLED_KEY, installed);
       emit('plugin:updated', { id: id, manifest: manifest, from: from, to: manifest.version });
     }
 
     if (isEnabled) {
-      if (hooks && typeof hooks.onEnable === 'function') hooks.onEnable(manifest);
+      runHook(id, 'onEnable', hooks, [manifest]);
       emit('plugin:enabled', { id: id, manifest: manifest });
     }
 
@@ -274,7 +313,7 @@
     enabledMap[id] = false;
     writeMap(ENABLED_KEY, enabledMap);
     var hooks = hookRegistry[id] || {};
-    if (typeof hooks.onDisable === 'function') hooks.onDisable(manifests[id]);
+    runHook(id, 'onDisable', hooks, [manifests[id]]);
     emit('plugin:disabled', { id: id, manifest: manifests[id] });
     return true;
   }
@@ -288,7 +327,7 @@
     enabledMap[id] = true;
     writeMap(ENABLED_KEY, enabledMap);
     var hooks = hookRegistry[id] || {};
-    if (typeof hooks.onEnable === 'function') hooks.onEnable(manifests[id]);
+    runHook(id, 'onEnable', hooks, [manifests[id]]);
     emit('plugin:enabled', { id: id, manifest: manifests[id] });
     return true;
   }
@@ -300,7 +339,7 @@
     }
     var manifest = manifests[id];
     var hooks = hookRegistry[id] || {};
-    if (typeof hooks.onUninstall === 'function') hooks.onUninstall(manifest);
+    runHook(id, 'onUninstall', hooks, [manifest]);
 
     var installed = readMap(INSTALLED_KEY);
     delete installed[id];

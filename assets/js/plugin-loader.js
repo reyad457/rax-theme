@@ -50,15 +50,32 @@
  * If RaxPlugins isn't loaded on a given page (e.g. a minimal custom
  * page that doesn't need the plugin platform), this is a silent no-op
  * — backward compatible with any page that predates plugins.js.
+ * ------------------------------------------------------------------
+ * DEV-MODE TIMING (zero cost when disabled): if `RaxDevMode` is loaded
+ * AND enabled, each script's load duration is measured and recorded
+ * via `RaxDevMode.recordPluginLoadTiming()`, and a full
+ * `RaxDevMode.report()` prints automatically once everything settles.
+ * Every one of these checks `RaxDevMode.isEnabled()` FIRST — a
+ * disabled (the default) or absent RaxDevMode means not even a single
+ * `Date.now()` call happens here.
  */
 (function (global) {
   'use strict';
 
+  function devModeOn() {
+    return !!(global.RaxDevMode && global.RaxDevMode.isEnabled());
+  }
+
   function load(src) {
+    var timed = devModeOn();
+    var start = timed ? Date.now() : 0;
     return new Promise(function (resolve, reject) {
       var script = document.createElement('script');
       script.src = src;
-      script.onload = function () { resolve(src); };
+      script.onload = function () {
+        if (timed) global.RaxDevMode.recordPluginLoadTiming(src, Date.now() - start);
+        resolve(src);
+      };
       script.onerror = function () {
         var err = new Error('[RaxPluginLoader] Failed to load plugin script: ' + src);
         console.error(err.message);
@@ -80,6 +97,7 @@
       });
     }, Promise.resolve()).then(function () {
       if (global.RaxPlugins) global.RaxPlugins.validateAll();
+      if (devModeOn()) global.RaxDevMode.report();
     });
   }
 

@@ -7,7 +7,8 @@ token system, the framework's core JavaScript modules, the boot sequence,
 and the design decisions behind each. For deep dives on specific subsystems,
 see the companion docs in this folder: `component-api.md`, `plugin-api.md`,
 `plugin-manifest.md`, `auth-api.md`, `theming.md`, `events.md`,
-`api-classification.md`, `project-structure.md` (file-by-file guide), and
+`api-classification.md`, `public-api.md`, `internal-api.md`,
+`versioning.md`, `project-structure.md` (file-by-file guide), and
 `architecture-diagram.md` (the same architecture as Mermaid diagrams).
 Start with `docs/README.md` if this is your first time in this folder.
 
@@ -27,6 +28,9 @@ rax-theme/
 │   ├── auth-api.md
 │   ├── theming.md
 │   ├── events.md
+│   ├── public-api.md
+│   ├── internal-api.md
+│   ├── versioning.md
 │   └── api-classification.md
 ├── plugins/
 │   └── README.md                 (convention doc)
@@ -51,8 +55,10 @@ rax-theme/
         ├── utils.js                  RaxUtils — shared helpers, incl. hexToRgba/readCssVar
         ├── theme.js                    RaxTheme — mode/accent manager + registerTheme()
         ├── auth.js                      RaxAuth — provider-based auth extension point (no built-in auth)
-        ├── plugins.js                    RaxPlugins — plugin manifests, lifecycle hooks, dependency validation
-        ├── plugin-loader.js              RaxPluginLoader — loads plugins/*/index.js before boot()
+        ├── dev-mode.js                   RaxDevMode — opt-in dev instrumentation (zero cost when disabled)
+        ├── api.js                         RaxAPI — Public/Internal/Experimental surface, deprecations, API versioning
+        ├── plugins.js                      RaxPlugins — plugin manifests, lifecycle hooks, dependency validation
+        ├── plugin-loader.js                 RaxPluginLoader — loads plugins/*/index.js before boot()
         ├── charts.js                      RaxCharts — sole Chart.js caller, with live dataset re-coloring
         ├── notifications.js                RaxNotifications — toast() API
         ├── search.js                        RaxSearch — per-page search provider registry
@@ -117,7 +123,8 @@ at the cost of not getting tree-shaking or minification for free. See
 order across every HTML file):
 
 ```
-events → registry → utils → theme → auth → plugins → plugin-loader → components/*
+events → registry → utils → theme → auth → dev-mode → api → plugins
+  → plugin-loader → components/*
   → charts → notifications → search → command-palette
   → navigation → menu-config → commands-config → core
   → pages/<this-page>.js
@@ -164,6 +171,20 @@ only — dependencies are never auto-installed), detects duplicate plugin/
 page/widget/command IDs across plugins, and exposes a read-only metadata API
 (`getPlugin`/`getPlugins`/`isPluginEnabled`/`getPluginVersion`). There is no
 plugin-manager UI, no installer, and no networking anywhere in this layer.
+
+## API stability (summary — full reference in `docs/versioning.md`, `docs/public-api.md`, `docs/internal-api.md`)
+
+Every export is classified Public, Internal, or Experimental, held at
+runtime by `RaxAPI` (`getClassification`, `getSurface`) and documented in
+`docs/public-api.md`/`docs/internal-api.md`. RAX Theme has two independent
+version numbers: `RaxCore.VERSION` (semver, changes every release) and
+`RaxAPI.VERSION` (a coarse `vN` tag, changes only on a breaking Public API
+change). A plugin manifest can declare `apiVersion` to have it checked
+automatically. A deprecation system (`RaxAPI.deprecate`/`warnDeprecated`)
+exists for the eventual first time a Public export needs to change — nothing
+is deprecated today. An opt-in, zero-overhead-when-disabled Developer Mode
+(`RaxDevMode`) reports deprecated-API usage, plugin load timing, and plugin
+lifecycle timing when enabled.
 
 ## Authentication (summary — full reference in `docs/auth-api.md`)
 

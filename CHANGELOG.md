@@ -5,6 +5,65 @@ loosely follows [Keep a Changelog](https://keepachangelog.com/); this project
 is pre-1.0, so early entries are grouped by development stage rather than by
 semantic version until the `v1.0.0` tag.
 
+## [Unreleased] — Framework API Stabilization
+
+### Added
+- `RaxAPI` (`assets/js/api.js`) — the Public/Internal/Experimental API
+  surface made a real, queryable runtime registry (previously
+  documentation-only in `docs/api-classification.md`):
+  - `classify()`/`getClassification()`/`getSurface()` — pre-populated with
+    every export's tier at load time.
+  - `deprecate()`/`warnDeprecated()`/`isDeprecated()`/`getDeprecations()` —
+    a deprecation system with `replacement` + `removalVersion` metadata.
+    `warnDeprecated()` is development-mode-only by design: zero cost if
+    `RaxDevMode` isn't enabled.
+  - `checkPluginCompatibility(manifest)` — validates a manifest's new
+    `apiVersion` field against `RaxAPI.VERSION`/`MIN_SUPPORTED_VERSION`;
+    called automatically by `RaxPlugins.registerManifest()` and folded into
+    its existing validation log.
+  - `RaxAPI.VERSION` (`'v1'`) — a framework **API** version, independent of
+    `RaxCore.VERSION` (the framework **release** version). See
+    `docs/versioning.md` for the full distinction.
+- `RaxDevMode` (`assets/js/dev-mode.js`) — opt-in, disabled-by-default
+  developer instrumentation: deprecated-API-usage reporting, plugin load
+  timing, plugin lifecycle hook timing, and a combined `report()` summary
+  that also surfaces `RaxPlugins`' existing (unconditional, unchanged)
+  duplicate-registration reporting. Every function checks
+  `isEnabled()`/an equivalent guard before doing any work — zero overhead
+  claim verified by code inspection, not just asserted.
+- New optional manifest field: `apiVersion` (e.g. `"v1"`) — report-only,
+  same policy as every other `RaxPlugins` validation check.
+- `docs/versioning.md`, `docs/public-api.md`, `docs/internal-api.md` — new.
+
+### Fixed
+- `docs/plugin-api.md` had an accidental duplicate "Authentication —
+  `RaxAuth`" section (introduced when the Auth Extension API stage's
+  content was inserted) — removed the misplaced duplicate, kept the one in
+  its correct position.
+- `docs/project-structure.md`'s `assets/js/` folder tree had been stale
+  since the Auth Extension API stage — missing `auth.js` and `plugins.js`
+  entirely. Rebuilt to match the actual folder contents, including this
+  stage's `dev-mode.js` and `api.js`.
+
+### Changed
+- `assets/js/plugins.js`: `registerManifest()` now also runs
+  `RaxAPI.checkPluginCompatibility()` (if `RaxAPI` is loaded) and times each
+  lifecycle hook call via `RaxDevMode` (if enabled). Both are soft,
+  guarded dependencies — confirmed by test that `registerManifest()` still
+  works identically with neither loaded.
+- `assets/js/plugin-loader.js`: records per-script load timing and calls
+  `RaxDevMode.report()` automatically at the end of `loadAll()`, but only
+  when `RaxDevMode` is loaded and enabled.
+- `docs/plugin-api.md`, `docs/architecture.md`, `docs/api-classification.md`,
+  `docs/README.md`, `README.md` updated throughout.
+
+### Explicitly not built (per this stage's own scope)
+- No UI redesign, no application features, no networking.
+- No existing Public API changed — every addition is new, optional surface.
+- Nothing was actually deprecated — the deprecation system is real and
+  tested, but no genuine deprecation candidate exists yet (see the
+  migration report for why one wasn't invented just to demonstrate it).
+
 ## [Unreleased] — Plugin Platform
 
 ### Added

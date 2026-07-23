@@ -39,6 +39,7 @@ optional metadata or optional behavior declaration.
   "category": "vpn",
   "keywords": ["vpn", "wireguard", "tunnels"],
   "minimumRaxVersion": "1.0.0",
+  "apiVersion": "v1",
   "permissions": ["wireguard.view", "wireguard.manage"],
   "dependencies": [
     { "id": "core-vpn-api", "version": ">=1.0.0" }
@@ -117,6 +118,18 @@ unsatisfied `minimumRaxVersion` logs a validation error
 from loading or running. By the time `registerManifest()` runs, the
 plugin's own script has already executed in full — there is nothing left to
 "block."
+
+### `apiVersion` (optional, string like `"v1"`)
+
+Which version of RAX Theme's **Public API contract** this plugin was built
+against — a different, coarser concept than `minimumRaxVersion`. See
+[`versioning.md`](versioning.md) for the full framework-version-vs-API-version
+distinction; in short: `minimumRaxVersion` says "this specific release is
+required," `apiVersion` says "the shape of the Public API I coded against."
+Also report-only — checked automatically via `RaxAPI.checkPluginCompatibility()`
+and folded into the same validation log as every other check here. Declaring
+this field is recommended but not required; an undeclared `apiVersion`
+produces an informational note, not an error or warning.
 
 ### `permissions` (optional, array of strings)
 

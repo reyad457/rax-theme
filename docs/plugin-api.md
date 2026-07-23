@@ -1,9 +1,13 @@
 # RAX Theme — Plugin / Extension API
 
 This is the complete, stable surface a plugin is expected to use. Everything
-here is classified **Public** in `docs/api-classification.md` — anything not
-listed here (or listed as Internal/Private there) is not part of the
-compatibility contract, even if technically reachable.
+here is classified **Public** in [`api-classification.md`](api-classification.md)
+(curated views: [`public-api.md`](public-api.md) /
+[`internal-api.md`](internal-api.md)) — anything not listed there as Public
+is not part of the compatibility contract, even if technically reachable.
+See [`versioning.md`](versioning.md) for what that contract actually
+guarantees, the deprecation system, and the difference between the
+framework version and the API version.
 
 A plugin **never** edits a framework file (`core.js`, `registry.js`,
 `navigation.js`, any `components/*.js`, any `components/*.css`). Everything a
@@ -39,8 +43,8 @@ the theme. See `plugins/README.md` for the plugin file convention itself.
 ### Lifecycle diagram
 
 ```
-1. Framework scripts load (events, registry, utils, theme, auth,
-   plugin-loader, components, services)
+1. Framework scripts load (events, registry, utils, theme, auth, dev-mode,
+   api, plugins, plugin-loader, components, services)
 2. RaxNavigation.mount({...}) — reserves the sidebar/topbar DOM, page id is now known
 3. RaxPluginLoader.loadAll()
      → each plugins/*/index.js runs, typically calling
@@ -220,14 +224,6 @@ RaxRegistry.registerPermission({
 });
 ```
 
-## Authentication — `RaxAuth`
-
-RAX Theme has no built-in login page or auth backend. If your host
-application needs real access control, register an auth provider — a
-complete, dedicated guide (interface contract, lifecycle, an illustrative
-example, and the exact backward-compatible default behavior when no
-provider is registered) is in [`docs/auth-api.md`](auth-api.md).
-
 ---
 
 ## Plugin manifest — `RaxPlugins.registerManifest(manifest, hooks?)`
@@ -338,6 +334,9 @@ path end to end (open its console — see `examples/hello-plugin/README.md`).
   both are named in the error.
 - **Unsupported framework version** — a manifest's `minimumRaxVersion`
   checked against `RaxCore.VERSION`.
+- **Unsupported/future API version** — a manifest's `apiVersion` checked
+  against `RaxAPI.VERSION`/`RaxAPI.MIN_SUPPORTED_VERSION`, folded into this
+  same log. Full detail: [`docs/versioning.md`](versioning.md).
 - **Missing dependencies** — see "Dependency resolution" above.
 
 All errors/warnings are human-readable strings, logged to the console with a
@@ -370,6 +369,20 @@ real, consuming UI is later work" pattern as `registerWidget()` before
 dashboard customization existed. A host application can build its own
 plugin-management surface on top of this API; RAX Theme deliberately ships
 none itself.
+
+## Developer mode
+
+Opt-in, disabled by default, zero overhead when off. Enable it to see
+deprecated-API-usage warnings, plugin load timing, and plugin lifecycle hook
+timing:
+
+```js
+window.RAX_DEV_MODE = true; // before framework scripts load, OR:
+RaxDevMode.enable();         // at any time
+RaxDevMode.report();          // prints a combined summary
+```
+
+Full reference: [`docs/versioning.md`](versioning.md#developer-mode).
 
 ## Authentication — `RaxAuth`
 

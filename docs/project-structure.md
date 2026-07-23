@@ -34,6 +34,9 @@ rax-theme/
 │   ├── auth-api.md               Auth provider extension API (no built-in auth)
 │   ├── theming.md                Accent/mode system, registerTheme(), verification results
 │   ├── events.md                 Every framework event: emitter, payload, consumer
+│   ├── versioning.md             Framework version vs API version, deprecation, dev mode
+│   ├── public-api.md             Curated Public-tier reference, safe to build against
+│   ├── internal-api.md           Curated Internal-tier reference, do not build against
 │   └── api-classification.md     Every export classified Public/Internal/Private
 │
 ├── plugins/
@@ -79,15 +82,19 @@ rax-theme/
         ├── registry.js              RaxRegistry — Extension API core (load 2nd)
         ├── utils.js                  RaxUtils — shared helpers incl. hexToRgba/readCssVar
         ├── theme.js                    RaxTheme — mode/accent manager + registerTheme()
-        ├── plugin-loader.js              RaxPluginLoader — loads plugins/*/index.js
-        ├── charts.js                      RaxCharts — sole Chart.js caller
-        ├── notifications.js                RaxNotifications — toast() API
-        ├── search.js                        RaxSearch — per-page search provider registry
-        ├── command-palette.js                RaxCommandPalette — ⌘K overlay logic
-        ├── navigation.js                      RaxNavigation — mounts Sidebar+Topbar
-        ├── menu-config.js                      Registers all 5 built-in pages' sidebar entries
-        ├── commands-config.js                   Registers built-in palette commands
-        ├── core.js                               RaxCore — boot orchestrator (load & call last)
+        ├── auth.js                      RaxAuth — provider-based auth extension point
+        ├── dev-mode.js                    RaxDevMode — opt-in dev instrumentation
+        ├── api.js                          RaxAPI — Public/Internal surface, deprecations, API versioning
+        ├── plugins.js                        RaxPlugins — manifests, lifecycle hooks, dependency validation
+        ├── plugin-loader.js                    RaxPluginLoader — loads plugins/*/index.js
+        ├── charts.js                             RaxCharts — sole Chart.js caller
+        ├── notifications.js                        RaxNotifications — toast() API
+        ├── search.js                                 RaxSearch — per-page search provider registry
+        ├── command-palette.js                          RaxCommandPalette — ⌘K overlay logic
+        ├── navigation.js                                 RaxNavigation — mounts Sidebar+Topbar
+        ├── menu-config.js                                  Registers all 5 built-in pages' sidebar entries
+        ├── commands-config.js                                Registers built-in palette commands
+        ├── core.js                                             RaxCore — boot orchestrator (load & call last)
         ├── components/
         │   ├── sidebar.js, topbar.js               Framework-owned singletons
         │   ├── card.js, widget.js                    Public, reusable

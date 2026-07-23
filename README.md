@@ -61,6 +61,10 @@ Reusable UI pieces (`Card`, `Widget`, `Table`...) are properties on a shared
   `version`, dependencies on other plugins, and more), gets 5 lifecycle
   hooks called through the existing loader, and has its dependencies
   validated — checked and reported, never auto-installed
+- **A stable, versioned Public API** — every export classified Public,
+  Internal, or Experimental; a deprecation system with replacement +
+  removal-version metadata; an API version independent of the framework's
+  own release version, checked automatically against a plugin's manifest
 - **Provider-based auth extension point** — plug in any authentication
   system (or none); RAX Theme ships no login page, no backend, and no
   access control until a host application registers a provider
@@ -121,6 +125,9 @@ rax-theme/
 │   ├── auth-api.md                auth provider extension API (no built-in auth)
 │   ├── theming.md                 accent/mode system + registerTheme()
 │   ├── events.md                  the full framework event catalog
+│   ├── versioning.md              framework version vs API version, deprecation, dev mode
+│   ├── public-api.md              curated Public-tier reference, safe to build against
+│   ├── internal-api.md            curated Internal-tier reference, do not build against
 │   └── api-classification.md      Public / Internal / Private, per export
 ├── plugins/
 │   └── README.md                  plugin folder convention
@@ -262,6 +269,26 @@ With no provider registered — the state of every page in this repository —
 about existing behavior changes until a host application opts in. Full
 reference: [`docs/auth-api.md`](docs/auth-api.md).
 
+## API stability & versioning
+
+Every export is classified **Public** (stable, build against it),
+**Internal** (used by the framework itself, can change without notice), or
+**Experimental**. RAX Theme tracks two independent version numbers — a
+semver framework release (`RaxCore.VERSION`) and a coarse API contract
+version (`RaxAPI.VERSION`, e.g. `"v1"`) that only changes on a breaking
+Public API change:
+
+```js
+RaxAPI.getClassification('RaxUtils', 'dom'); // -> 'internal' — don't build on this
+RaxAPI.deprecate('Old.thing', { replacement: 'New.thing', removalVersion: '2.0.0' });
+```
+
+A plugin manifest can declare `apiVersion` to have it checked automatically
+against the current API version — see [`docs/versioning.md`](docs/versioning.md).
+An opt-in Developer Mode (`window.RAX_DEV_MODE = true` or `RaxDevMode.enable()`,
+zero overhead when off) reports deprecated-API usage and plugin load/lifecycle
+timing.
+
 ## Component system
 
 Every reusable UI piece follows one contract:
@@ -299,6 +326,10 @@ Start at [`docs/README.md`](docs/README.md) for the full documentation index
 and recommended reading order. Most frequently needed while building
 something:
 
+- [`docs/public-api.md`](docs/public-api.md) — the curated, complete list
+  of everything safe to build a plugin against.
+- [`docs/versioning.md`](docs/versioning.md) — framework version vs. API
+  version, and the deprecation system.
 - [`docs/api-classification.md`](docs/api-classification.md) — every
   exported function, classified Public/Internal/Private, with why.
 - [`docs/plugin-api.md`](docs/plugin-api.md) — the complete Extension API

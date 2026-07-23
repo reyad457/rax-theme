@@ -46,6 +46,7 @@
     category: 'example',
     keywords: ['example', 'extension-api', 'starter'],
     minimumRaxVersion: '1.0.0',
+    apiVersion: 'v1',
     permissions: [],
     dependencies: [],
     // Deliberately references a plugin that is NOT registered anywhere
