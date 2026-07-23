@@ -155,7 +155,7 @@ serve it with any static file server:
 
 ```bash
 # TODO: replace with the actual repository URL once published
-git clone https://github.com/<org>/rax-theme.git
+git clone https://github.com/reyad457/rax-theme.git
 cd rax-theme
 python3 -m http.server 8080
 # then open http://localhost:8080/dashboard.html
