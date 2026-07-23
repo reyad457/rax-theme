@@ -77,15 +77,20 @@ Reusable UI pieces (`Card`, `Widget`, `Table`...) are properties on a shared
 
 ## Screenshots
 
-> _Screenshots pending — add rendered captures of each of the 5 pages here
-> before the v1.0.0 tag. Suggested set:_
-> - `docs/screenshots/dashboard.png`
-> - `docs/screenshots/interfaces.png`
-> - `docs/screenshots/vpn.png`
-> - `docs/screenshots/suricata.png`
-> - `docs/screenshots/logs.png`
-> - `docs/screenshots/dark-vs-light.png` (mode comparison)
-> - `docs/screenshots/accents.png` (all 5 accent themes side by side)
+### Dashboard
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Interfaces
+![Interfaces](docs/screenshots/interfaces.png)
+
+### VPN
+![VPN](docs/screenshots/vpn.png)
+
+### Suricata
+![Suricata](docs/screenshots/suricata.png)
+
+### Logs
+![Logs](docs/screenshots/logs.png)
 
 ## Architecture overview
 
